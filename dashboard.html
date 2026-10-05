@@ -30,22 +30,22 @@
     .btn { padding: 8px 16px; border-radius: 6px; border: none; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
     .btn-primary { background: linear-gradient(90deg, #00c6ff, #0072ff); color: white; }
     .btn-primary:hover { opacity: 0.9; }
+    .btn-success { background: #10b981; color: white; }
+    .btn-success:hover { background: #059669; }
     .btn-secondary { background: #475569; color: white; }
     .btn-edit { background: #10b981; color: white; padding: 6px 8px; border-radius: 4px; }
     .btn-reload { background: #f59e0b; color: white; padding: 6px 8px; border-radius: 4px; }
     .btn-delete { background: #ef4444; color: white; padding: 6px 8px; border-radius: 4px; }
 
-    /* Dark Cards & Metric Gauges */
+    /* Cards & Metrics */
     .card { background: #1c2541; border-radius: 12px; border: 1px solid #2a385b; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
     .card-title { font-size: 15px; font-weight: 600; margin-bottom: 15px; color: #38bdf8; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a385b; padding-bottom: 10px; }
 
-    /* Analytics Grid Layout */
     .analytics-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
     .metric-card { background: #151d36; border: 1px solid #2a385b; border-radius: 12px; padding: 15px; text-align: center; }
     .metric-value { font-size: 28px; font-weight: bold; color: #00f2fe; margin: 10px 0 5px; }
     .metric-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
 
-    .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .dashboard-grid-full { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
 
     /* Form & Tables */
@@ -58,10 +58,14 @@
     th, td { border-bottom: 1px solid #2a385b; padding: 12px 10px; text-align: left; font-size: 13px; color: #cbd5e1; }
     th { background: #0f172a; color: #38bdf8; font-weight: 600; }
 
-    .search-filter-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .search-input { width: 250px; }
+    .search-filter-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 10px; flex-wrap: wrap; }
+    .search-input { width: 220px; }
 
-    /* Modal Overlay & Box Dark */
+    /* Status Badge */
+    .badge-hadir { background: #10b98122; color: #10b981; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; border: 1px solid #10b98155; }
+    .badge-alpha { background: #ef444422; color: #f87171; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; border: 1px solid #ef444455; }
+
+    /* Modal Overlay & Box */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
     .modal-overlay.active { display: flex; }
     .modal { background: #1c2541; border: 1px solid #3b82f6; border-radius: 12px; width: 480px; max-width: 90%; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -71,7 +75,7 @@
     .modal-body { padding: 20px; }
     .modal-footer { padding: 15px 20px; border-top: 1px solid #2a385b; display: flex; justify-content: flex-end; gap: 10px; }
 
-    /* Scan Box Dark */
+    /* Scan Box */
     .scan-box { background: #0f172a; border: 2px dashed #0284c7; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
     .scan-input { font-size: 20px; text-align: center; letter-spacing: 2px; font-weight: bold; background: #1e293b; color: #38bdf8; }
   </style>
@@ -106,7 +110,7 @@
       </li>
       <li class="menu-item">
         <a id="nav-riwayat" onclick="showTab('riwayat')">
-          <span><i class="fa-solid fa-clock-rotate-left fa-fw"></i> Rekap Presensi</span>
+          <span><i class="fa-solid fa-file-excel fa-fw"></i> Rekap & Export Excel</span>
         </a>
       </li>
     </ul>
@@ -121,10 +125,8 @@
 
     <div class="main-body">
 
-      <!-- TAB DASHBOARD ANALYTICS (Model Sesuai Gambar Referensi) -->
+      <!-- TAB DASHBOARD ANALYTICS -->
       <div id="tab-dashboard">
-        
-        <!-- Top Metrics (3 Ring Stat Gauges) -->
         <div class="analytics-row">
           <div class="metric-card">
             <div class="metric-label">Total Target Peserta</div>
@@ -143,30 +145,17 @@
           </div>
         </div>
 
-        <!-- Dashboard Charts Grid -->
         <div class="dashboard-grid-full" style="margin-bottom: 20px;">
-          <!-- Grafik Batang Kehadiran per Kegiatan -->
           <div class="card">
-            <div class="card-title">
-              <span><i class="fa-solid fa-chart-column"></i> Kehadiran Peserta per Kegiatan</span>
-            </div>
-            <div style="height: 230px;">
-              <canvas id="chartBarKegiatan"></canvas>
-            </div>
+            <div class="card-title"><span><i class="fa-solid fa-chart-column"></i> Kehadiran Peserta per Kegiatan</span></div>
+            <div style="height: 230px;"><canvas id="chartBarKegiatan"></canvas></div>
           </div>
-
-          <!-- Donut Chart Kehadiran -->
           <div class="card">
-            <div class="card-title">
-              <span><i class="fa-solid fa-chart-pie"></i> Ratio Kehadiran Global</span>
-            </div>
-            <div style="height: 230px; display: flex; justify-content: center;">
-              <canvas id="chartDonutHadir"></canvas>
-            </div>
+            <div class="card-title"><span><i class="fa-solid fa-chart-pie"></i> Ratio Kehadiran Global</span></div>
+            <div style="height: 230px; display: flex; justify-content: center;"><canvas id="chartDonutHadir"></canvas></div>
           </div>
         </div>
 
-        <!-- Live Real-time Scan Table -->
         <div class="card">
           <div class="card-title">
             <span><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Real-time Presensi Data Log</span>
@@ -178,16 +167,14 @@
                 <th>Waktu Scan</th>
                 <th>ID PPS</th>
                 <th>Nama Peserta</th>
+                <th>DOM</th>
                 <th>Kegiatan</th>
                 <th>Status</th>
               </tr>
             </thead>
-            <tbody id="dash-table-live">
-              <!-- Live Log -->
-            </tbody>
+            <tbody id="dash-table-live"></tbody>
           </table>
         </div>
-
       </div>
 
       <!-- TAB KEGIATAN MASTER -->
@@ -196,16 +183,13 @@
           <div class="card-title">
             <span>Daftar Kegiatan Master</span>
             <div>
-              <button class="btn btn-delete" onclick="hapusTerpilih()"><i class="fa-solid fa-trash"></i> Hapus yang Dipilih</button>
+              <button class="btn btn-delete" onclick="hapusTerpilih()"><i class="fa-solid fa-trash"></i> Hapus Dipilih</button>
               <button class="btn btn-primary" onclick="bukaModalTambah()"><i class="fa-solid fa-plus"></i> Entri F1</button>
             </div>
           </div>
-
           <div class="search-filter-bar">
-            <div>Show <select class="form-control" style="width: auto; display: inline-block;"><option>10</option></select> entries</div>
             <div>Search: <input type="text" class="form-control search-input" onkeyup="filterTable(this, 'table-kegiatan-body')"></div>
           </div>
-
           <table>
             <thead>
               <tr>
@@ -217,33 +201,25 @@
                 <th width="150" style="text-align: center;">Aksi</th>
               </tr>
             </thead>
-            <tbody id="table-kegiatan-body">
-              <!-- Render Otomatis -->
-            </tbody>
+            <tbody id="table-kegiatan-body"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- TAB PRESENSI -->
+      <!-- TAB PRESENSI SCAN -->
       <div id="tab-presensi" style="display: none;">
         <div class="card">
           <div class="card-title"><span>Terminal Presensi Kegiatan</span></div>
-
           <div class="form-group">
             <label>Pilih Kegiatan Target Presensi:</label>
-            <select id="select-kegiatan-presensi" class="form-control" style="font-weight: bold; color: #38bdf8;" onchange="renderLogPresensi()">
-              <!-- Auto filled -->
-            </select>
+            <select id="select-kegiatan-presensi" class="form-control" style="font-weight: bold; color: #38bdf8;" onchange="renderLogPresensi()"></select>
           </div>
-
           <div class="scan-box">
             <h3 style="margin-bottom: 10px; color: #38bdf8;"><i class="fa-solid fa-barcode"></i> Masukkan / Scan ID PPS</h3>
             <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px;">Ketik ID PPS lalu tekan Enter untuk menyimpan presensi.</p>
             <input type="text" id="input-id-pps" class="form-control scan-input" placeholder="Masukkan ID PPS..." onkeydown="checkInputId(event)">
           </div>
-
           <div id="presensi-alert" style="display: none; padding: 12px; border-radius: 6px; font-weight: bold; margin-bottom: 15px; text-align: center;"></div>
-
           <h4>Log Presensi Kegiatan Ini:</h4>
           <table>
             <thead>
@@ -251,33 +227,60 @@
                 <th>Waktu</th>
                 <th>ID PPS</th>
                 <th>Nama Peserta</th>
+                <th>DOM</th>
                 <th>Status</th>
               </tr>
             </thead>
-            <tbody id="table-log-presensi">
-              <!-- Auto filled -->
-            </tbody>
+            <tbody id="table-log-presensi"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- TAB REKAP -->
+      <!-- TAB REKAP & EXPORT EXCEL -->
       <div id="tab-riwayat" style="display: none;">
         <div class="card">
-          <div class="card-title"><span>Rekapitulasi Semua Presensi</span></div>
+          <div class="card-title">
+            <span><i class="fa-solid fa-file-excel"></i> Rekapitulasi Presensi (Hadir & Alpha)</span>
+            <button class="btn btn-success" onclick="exportKeExcel()"><i class="fa-solid fa-file-export"></i> Export Ke Excel</button>
+          </div>
+
+          <!-- Filter Options -->
+          <div class="search-filter-bar">
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <div>
+                <label style="font-size: 12px; color: #94a3b8; display: block;">Filter Kegiatan:</label>
+                <select id="rekap-filter-kegiatan" class="form-control" style="width: 220px;" onchange="renderRekapSemua()">
+                  <option value="all">-- Semua Kegiatan --</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 12px; color: #94a3b8; display: block;">Filter Status:</label>
+                <select id="rekap-filter-status" class="form-control" style="width: 150px;" onchange="renderRekapSemua()">
+                  <option value="all">Semua Status</option>
+                  <option value="hadir">Hadir</option>
+                  <option value="alpha">Alpha (Belum Hadir)</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label style="font-size: 12px; color: #94a3b8; display: block;">Cari Peserta:</label>
+              <input type="text" class="form-control search-input" placeholder="Cari Nama/ID PPS..." onkeyup="filterTable(this, 'table-rekap-semua')">
+            </div>
+          </div>
+
           <table>
             <thead>
               <tr>
-                <th>No</th>
+                <th width="40">No</th>
                 <th>Kegiatan</th>
                 <th>ID PPS</th>
                 <th>Nama Peserta</th>
+                <th>DOM</th>
                 <th>Waktu Presensi</th>
+                <th>Keterangan</th>
               </tr>
             </thead>
-            <tbody id="table-rekap-semua">
-              <!-- Auto Render -->
-            </tbody>
+            <tbody id="table-rekap-semua"></tbody>
           </table>
         </div>
       </div>
@@ -294,12 +297,10 @@
       </div>
       <div class="modal-body">
         <input type="hidden" id="edit-kegiatan-id">
-        
         <div class="form-group">
           <label>Nama Kegiatan :</label>
           <input type="text" id="modal-nama-kegiatan" class="form-control" placeholder="Nama kegiatan">
         </div>
-
         <div class="form-group">
           <label>Penyesuaian Tanggal Kegiatan :</label>
           <select id="modal-tgl-kegiatan" class="form-control">
@@ -307,14 +308,6 @@
             <option value="Gunakan Tanggal Esok Hari">Gunakan Tanggal Esok Hari</option>
           </select>
         </div>
-
-        <div class="form-group">
-          <label>*Metode Entri Data Peserta :</label>
-          <select class="form-control">
-            <option>Unggah melalui Excel</option>
-          </select>
-        </div>
-
         <div class="form-group">
           <label>File Excel Peserta (.xlsx / .xls)</label>
           <input type="file" id="modal-excel-file" class="form-control" accept=".xlsx, .xls">
@@ -329,25 +322,25 @@
   </div>
 
   <script>
-    // Initial Data Default
     let listKegiatan = JSON.parse(localStorage.getItem('ttq_kegiatan_v3')) || [
       { id: 1, nama: "Pelantikan Juri Mtq", tanggal: "Hari Ini", pesertaList: [] },
-      { id: 2, nama: "Koordinasi Kontroling", tanggal: "Hari Ini", pesertaList: [] },
-      { id: 3, nama: "Pemaduan Muallim", tanggal: "Hari Ini", pesertaList: [] },
-      { id: 4, nama: "Koordinasi Muallim Mqs", tanggal: "Hari Ini", pesertaList: [] },
-      { id: 5, nama: "Koordinasi Mtq 1", tanggal: "Hari Ini", pesertaList: [] },
-      { id: 6, nama: "Koordinasi Sesi 2", tanggal: "Esok Hari", pesertaList: [] }
+      { id: 2, nama: "Koordinasi Kontroling", tanggal: "Hari Ini", pesertaList: [] }
     ];
 
     let logPresensi = JSON.parse(localStorage.getItem('ttq_log_presensi_v3')) || [];
-
     let chartBarInstance = null;
     let chartDonutInstance = null;
 
-    // Navigasi Tab
+    // Helper Fungsi Ambil Prop
+    function getProp(obj, props) {
+      for (let p of props) {
+        if (obj && obj[p] !== undefined && obj[p] !== null) return obj[p];
+      }
+      return '';
+    }
+
     function showTab(tabName) {
-      const tabs = ['dashboard', 'kegiatan', 'presensi', 'riwayat'];
-      tabs.forEach(t => {
+      ['dashboard', 'kegiatan', 'presensi', 'riwayat'].forEach(t => {
         document.getElementById('tab-' + t).style.display = t === tabName ? 'block' : 'none';
         const navEl = document.getElementById('nav-' + t);
         if (navEl) navEl.classList.toggle('active', t === tabName);
@@ -356,15 +349,12 @@
       if (tabName === 'dashboard') renderDashboardAnalytics();
       if (tabName === 'kegiatan') renderKegiatanTable();
       if (tabName === 'presensi') updateSelectKegiatan();
-      if (tabName === 'riwayat') renderRekapSemua();
+      if (tabName === 'riwayat') initRekapTab();
     }
 
-    // Render Dashboard Analytics (Grafik & Stat Gauge)
     function renderDashboardAnalytics() {
       let totalPesertaTarget = 0;
-      listKegiatan.forEach(k => {
-        totalPesertaTarget += (k.pesertaList ? k.pesertaList.length : 0);
-      });
+      listKegiatan.forEach(k => totalPesertaTarget += (k.pesertaList ? k.pesertaList.length : 0));
 
       const totalHadir = logPresensi.length;
       const persen = totalPesertaTarget > 0 ? Math.round((totalHadir / totalPesertaTarget) * 100) : 0;
@@ -373,11 +363,10 @@
       document.getElementById('dash-total-hadir').innerText = totalHadir;
       document.getElementById('dash-persen-hadir').innerText = persen + '%';
 
-      // Render Live Table Log Dashboard
       const liveTable = document.getElementById('dash-table-live');
       liveTable.innerHTML = '';
       if (logPresensi.length === 0) {
-        liveTable.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748b;">Belum ada presensi yang tercatat.</td></tr>';
+        liveTable.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #64748b;">Belum ada presensi tercatat.</td></tr>';
       } else {
         logPresensi.slice(0, 5).forEach(p => {
           liveTable.innerHTML += `
@@ -385,19 +374,17 @@
               <td>${p.waktu}</td>
               <td><strong style="color: #00f2fe;">${p.idPps}</strong></td>
               <td>${p.nama}</td>
+              <td>${p.dom || '-'}</td>
               <td>${p.kegiatanNama}</td>
-              <td><span style="background: #10b98122; color: #10b981; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; border: 1px solid #10b98155;">Hadir</span></td>
+              <td><span class="badge-hadir">Hadir</span></td>
             </tr>
           `;
         });
       }
-
-      // Render Charts
       initCharts(totalPesertaTarget, totalHadir);
     }
 
     function initCharts(totalTarget, totalHadir) {
-      // Bar Chart - Kehadiran per Kegiatan
       const labels = listKegiatan.map(k => k.nama.length > 15 ? k.nama.substring(0, 15) + '...' : k.nama);
       const dataHadir = listKegiatan.map(k => logPresensi.filter(p => p.kegiatanId === k.id).length);
 
@@ -405,45 +392,17 @@
       if (chartBarInstance) chartBarInstance.destroy();
       chartBarInstance = new Chart(ctxBar, {
         type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Jumlah Hadir',
-            data: dataHadir,
-            backgroundColor: '#00c6ff',
-            borderRadius: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
-            y: { ticks: { color: '#94a3b8', precision: 0 }, grid: { color: '#2a385b' } }
-          }
-        }
+        data: { labels: labels, datasets: [{ label: 'Jumlah Hadir', data: dataHadir, backgroundColor: '#00c6ff', borderRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8', precision: 0 }, grid: { color: '#2a385b' } } } }
       });
 
-      // Donut Chart
       const belumHadir = Math.max(0, totalTarget - totalHadir);
       const ctxDonut = document.getElementById('chartDonutHadir').getContext('2d');
       if (chartDonutInstance) chartDonutInstance.destroy();
       chartDonutInstance = new Chart(ctxDonut, {
         type: 'doughnut',
-        data: {
-          labels: ['Hadir', 'Belum Hadir'],
-          datasets: [{
-            data: [totalHadir, belumHadir],
-            backgroundColor: ['#10b981', '#334155'],
-            borderWidth: 0
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1' } } }
-        }
+        data: { labels: ['Hadir', 'Alpha'], datasets: [{ data: [totalHadir, belumHadir], backgroundColor: ['#10b981', '#ef4444'], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1' } } } }
       });
     }
 
@@ -469,7 +428,6 @@
       
       const totalPeserta = keg.pesertaList ? keg.pesertaList.length : 0;
       document.getElementById('excel-status').innerText = totalPeserta > 0 ? `*Sudah ada ${totalPeserta} peserta terupload` : '';
-      
       document.getElementById('modal-kegiatan').classList.add('active');
     }
 
@@ -477,7 +435,6 @@
       document.getElementById('modal-kegiatan').classList.remove('active');
     }
 
-    // Simpan Data
     function simpanDataKegiatan() {
       const id = document.getElementById('edit-kegiatan-id').value;
       const nama = document.getElementById('modal-nama-kegiatan').value;
@@ -485,10 +442,7 @@
       const tglText = tglOpt.includes('Esok') ? 'Esok Hari' : 'Hari Ini';
       const fileInput = document.getElementById('modal-excel-file');
 
-      if (!nama) {
-        alert('Nama Kegiatan wajib diisi!');
-        return;
-      }
+      if (!nama) return alert('Nama Kegiatan wajib diisi!');
 
       let kegObj = id ? listKegiatan.find(k => k.id == id) : null;
 
@@ -507,8 +461,7 @@
         reader.onload = function(e) {
           const data = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: 'array' });
-          const firstSheet = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[firstSheet];
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
           
           kegObj.pesertaList = XLSX.utils.sheet_to_json(worksheet);
           localStorage.setItem('ttq_kegiatan_v3', JSON.stringify(listKegiatan));
@@ -525,13 +478,12 @@
       }
     }
 
-    // Render Tabel Kegiatan
     function renderKegiatanTable() {
       const tbody = document.getElementById('table-kegiatan-body');
       tbody.innerHTML = '';
 
       if (listKegiatan.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #64748b;">Belum ada kegiatan. Klik tombol Entri F1 untuk menambah kegiatan.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #64748b;">Belum ada kegiatan.</td></tr>';
         return;
       }
 
@@ -544,11 +496,11 @@
             <td><input type="checkbox" class="check-item" value="${item.id}"></td>
             <td>${index + 1}</td>
             <td><strong>${item.nama}</strong></td>
-            <td>${totalPeserta} Santri (${countHadir} Aktif, 0 Izin/Sakit)</td>
+            <td>${totalPeserta} Santri (${countHadir} Hadir)</td>
             <td>Tgl ${item.tanggal}</td>
             <td style="text-align: center; white-space: nowrap;">
               <button class="btn btn-reload" title="Reset Presensi" onclick="resetPresensiKegiatan(${item.id})"><i class="fa-solid fa-rotate-right"></i></button>
-              <button class="btn btn-edit" title="Edit Kegiatan & Peserta" onclick="bukaModalEdit(${item.id})"><i class="fa-solid fa-pen"></i></button>
+              <button class="btn btn-edit" title="Edit Kegiatan" onclick="bukaModalEdit(${item.id})"><i class="fa-solid fa-pen"></i></button>
               <button class="btn btn-delete" title="Hapus Kegiatan" onclick="hapusKegiatan(${item.id}, '${item.nama}')"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
@@ -557,39 +509,30 @@
     }
 
     function toggleSelectAll(source) {
-      const checkboxes = document.querySelectorAll('.check-item');
-      checkboxes.forEach(cb => cb.checked = source.checked);
+      document.querySelectorAll('.check-item').forEach(cb => cb.checked = source.checked);
     }
 
     function hapusKegiatan(id, namaKegiatan) {
-      if (confirm(`Apakah Anda yakin ingin menghapus kegiatan "${namaKegiatan}"?`)) {
+      if (confirm(`Hapus kegiatan "${namaKegiatan}"?`)) {
         listKegiatan = listKegiatan.filter(k => k.id !== id);
         logPresensi = logPresensi.filter(p => p.kegiatanId !== id);
-
         localStorage.setItem('ttq_kegiatan_v3', JSON.stringify(listKegiatan));
         localStorage.setItem('ttq_log_presensi_v3', JSON.stringify(logPresensi));
-
         renderKegiatanTable();
       }
     }
 
     function hapusTerpilih() {
       const checkedBoxes = document.querySelectorAll('.check-item:checked');
-      if (checkedBoxes.length === 0) {
-        alert('Tandai/centang minimal satu kegiatan yang ingin dihapus!');
-        return;
-      }
+      if (checkedBoxes.length === 0) return alert('Tandai kegiatan yang ingin dihapus!');
 
-      if (confirm(`Apakah Anda yakin ingin menghapus ${checkedBoxes.length} kegiatan yang ditandai?`)) {
+      if (confirm(`Hapus ${checkedBoxes.length} kegiatan yang ditandai?`)) {
         const idsToHapus = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
-        
         listKegiatan = listKegiatan.filter(k => !idsToHapus.includes(k.id));
         logPresensi = logPresensi.filter(p => !idsToHapus.includes(p.kegiatanId));
 
         localStorage.setItem('ttq_kegiatan_v3', JSON.stringify(listKegiatan));
         localStorage.setItem('ttq_log_presensi_v3', JSON.stringify(logPresensi));
-
-        document.getElementById('check-all').checked = false;
         renderKegiatanTable();
       }
     }
@@ -597,15 +540,11 @@
     function updateSelectKegiatan() {
       const select = document.getElementById('select-kegiatan-presensi');
       select.innerHTML = '';
-      
       if (listKegiatan.length === 0) {
         select.innerHTML = '<option value="">-- Tidak ada kegiatan --</option>';
         return;
       }
-
-      listKegiatan.forEach(k => {
-        select.innerHTML += `<option value="${k.id}">${k.nama}</option>`;
-      });
+      listKegiatan.forEach(k => select.innerHTML += `<option value="${k.id}">${k.nama}</option>`);
       renderLogPresensi();
     }
 
@@ -616,15 +555,11 @@
         const kegiatanId = parseInt(document.getElementById('select-kegiatan-presensi').value);
 
         if (!idPps) return;
-
         const kegiatanObj = listKegiatan.find(k => k.id === kegiatanId);
-        if (!kegiatanObj) {
-          alert('Pilih kegiatan yang valid terlebih dahulu!');
-          return;
-        }
+        if (!kegiatanObj) return alert('Pilih kegiatan terlebih dahulu!');
 
         const listPeserta = kegiatanObj.pesertaList || [];
-        const pesertaFound = listPeserta.find(p => (p.ID || p.id || p.NIP || '').toString() === idPps);
+        const pesertaFound = listPeserta.find(p => getProp(p, ['ID', 'id', 'NIP', 'ID PPS']).toString() === idPps);
 
         const alertBox = document.getElementById('presensi-alert');
         alertBox.style.display = 'block';
@@ -632,23 +567,26 @@
         if (!pesertaFound) {
           alertBox.style.background = '#450a0a';
           alertBox.style.color = '#fca5a5';
-          alertBox.innerText = '❌ ID PPS ' + idPps + ' TIDAK TERDAFTAR dalam kegiatan ' + kegiatanObj.nama + '!';
+          alertBox.innerText = '❌ ID PPS ' + idPps + ' TIDAK TERDAFTAR!';
           idInput.value = '';
           return;
         }
 
         const isAlready = logPresensi.some(p => p.idPps === idPps && p.kegiatanId === kegiatanId);
+        const namaPeserta = getProp(pesertaFound, ['Nama', 'nama', 'NAMA']);
+        const domPeserta = getProp(pesertaFound, ['DOM', 'dom', 'Dom', 'Daerah']);
 
         if (isAlready) {
           alertBox.style.background = '#451a03';
           alertBox.style.color = '#fcd34d';
-          alertBox.innerText = '⚠️ ID ' + idPps + ' (' + (pesertaFound.Nama || pesertaFound.nama) + ') sudah presensi sebelumnya!';
+          alertBox.innerText = '⚠️ ID ' + idPps + ' (' + namaPeserta + ') sudah presensi!';
         } else {
           logPresensi.unshift({
             kegiatanId: kegiatanId,
             kegiatanNama: kegiatanObj.nama,
             idPps: idPps,
-            nama: pesertaFound.Nama || pesertaFound.nama || 'Peserta',
+            nama: namaPeserta || 'Peserta',
+            dom: domPeserta || '-',
             waktu: new Date().toLocaleTimeString()
           });
 
@@ -656,7 +594,7 @@
 
           alertBox.style.background = '#064e3b';
           alertBox.style.color = '#6ee7b7';
-          alertBox.innerText = '✅ Presensi Berhasil: ' + (pesertaFound.Nama || pesertaFound.nama);
+          alertBox.innerText = '✅ Presensi Berhasil: ' + namaPeserta;
           renderLogPresensi();
         }
 
@@ -668,15 +606,13 @@
       const tbody = document.getElementById('table-log-presensi');
       const selectVal = document.getElementById('select-kegiatan-presensi').value;
       if (!selectVal) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #64748b;">Belum ada kegiatan terpilih.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748b;">Belum ada kegiatan terpilih.</td></tr>';
         return;
       }
 
-      const kegiatanId = parseInt(selectVal);
-      const filtered = logPresensi.filter(p => p.kegiatanId === kegiatanId);
-
+      const filtered = logPresensi.filter(p => p.kegiatanId === parseInt(selectVal));
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #64748b;">Belum ada presensi pada kegiatan ini.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748b;">Belum ada presensi pada kegiatan ini.</td></tr>';
         return;
       }
 
@@ -687,35 +623,130 @@
             <td>${log.waktu}</td>
             <td><strong style="color: #00f2fe;">${log.idPps}</strong></td>
             <td>${log.nama}</td>
-            <td><span style="background: #10b98122; color: #10b981; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px;">Hadir</span></td>
+            <td>${log.dom || '-'}</td>
+            <td><span class="badge-hadir">Hadir</span></td>
           </tr>
         `;
       });
+    }
+
+    // --- LOGIKA REKAP & EXPORT EXCEL (HADIR & ALPHA) ---
+    function initRekapTab() {
+      const selectKeg = document.getElementById('rekap-filter-kegiatan');
+      selectKeg.innerHTML = '<option value="all">-- Semua Kegiatan --</option>';
+      listKegiatan.forEach(k => {
+        selectKeg.innerHTML += `<option value="${k.id}">${k.nama}</option>`;
+      });
+      renderRekapSemua();
+    }
+
+    function getRekapDataCombined() {
+      const selectedKegId = document.getElementById('rekap-filter-kegiatan').value;
+      const selectedStatus = document.getElementById('rekap-filter-status').value;
+
+      let combinedData = [];
+
+      let filteredKegiatan = listKegiatan;
+      if (selectedKegId !== 'all') {
+        filteredKegiatan = listKegiatan.filter(k => k.id === parseInt(selectedKegId));
+      }
+
+      filteredKegiatan.forEach(keg => {
+        const pesertaList = keg.pesertaList || [];
+        
+        pesertaList.forEach(peserta => {
+          const idPps = getProp(peserta, ['ID', 'id', 'NIP', 'ID PPS', 'Id Pps']).toString();
+          const nama = getProp(peserta, ['Nama', 'nama', 'NAMA']);
+          const dom = getProp(peserta, ['DOM', 'dom', 'Dom', 'Daerah', 'ALAMAT']);
+
+          // Cek apakah presensi
+          const presensiRecord = logPresensi.find(p => p.kegiatanId === keg.id && p.idPps === idPps);
+
+          const isHadir = !!presensiRecord;
+          const statusKeterangan = isHadir ? 'Hadir' : 'Alpha';
+          const waktuPresensi = isHadir ? presensiRecord.waktu : '';
+
+          // Filter berdasarkan Status
+          if (selectedStatus === 'all' || (selectedStatus === 'hadir' && isHadir) || (selectedStatus === 'alpha' && !isHadir)) {
+            combinedData.push({
+              kegiatanNama: keg.nama,
+              idPps: idPps,
+              nama: nama || '-',
+              dom: dom || '-',
+              waktu: waktuPresensi,
+              keterangan: statusKeterangan
+            });
+          }
+        });
+      });
+
+      return combinedData;
     }
 
     function renderRekapSemua() {
       const tbody = document.getElementById('table-rekap-semua');
-      if (logPresensi.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748b;">Belum ada data presensi.</td></tr>';
+      const data = getRekapDataCombined();
+
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #64748b;">Tidak ada data rekap presensi yang sesuai.</td></tr>';
         return;
       }
 
       tbody.innerHTML = '';
-      logPresensi.forEach((log, index) => {
+      data.forEach((row, index) => {
+        const badgeClass = row.keterangan === 'Hadir' ? 'badge-hadir' : 'badge-alpha';
         tbody.innerHTML += `
           <tr>
             <td>${index + 1}</td>
-            <td><strong>${log.kegiatanNama}</strong></td>
-            <td>${log.idPps}</td>
-            <td>${log.nama}</td>
-            <td>${log.waktu}</td>
+            <td><strong>${row.kegiatanNama}</strong></td>
+            <td><strong style="color: #00f2fe;">${row.idPps}</strong></td>
+            <td>${row.nama}</td>
+            <td>${row.dom}</td>
+            <td>${row.waktu || '-'}</td>
+            <td><span class="${badgeClass}">${row.keterangan}</span></td>
           </tr>
         `;
       });
     }
 
+    // EXPORT TO EXCEL FUNCTION
+    function exportKeExcel() {
+      const data = getRekapDataCombined();
+      if (data.length === 0) return alert('Tidak ada data yang dapat diexport!');
+
+      // Format Sheet Excel
+      const excelRows = data.map((item, idx) => ({
+        "No": idx + 1,
+        "Kegiatan": item.kegiatanNama,
+        "ID PPS": item.idPps,
+        "Nama Peserta": item.nama,
+        "DOM": item.dom,
+        "Waktu Scan": item.waktu || "",
+        "Keterangan": item.keterangan
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(excelRows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Presensi");
+
+      // Auto Adjust Column Widths
+      const max_width = excelRows.reduce((w, r) => Math.max(w, r["Nama Peserta"].length), 10);
+      worksheet["!cols"] = [
+        { wch: 5 },  // No
+        { wch: 25 }, // Kegiatan
+        { wch: 15 }, // ID PPS
+        { wch: Math.max(max_width, 20) }, // Nama
+        { wch: 20 }, // DOM
+        { wch: 15 }, // Waktu
+        { wch: 12 }  // Keterangan
+      ];
+
+      // Download File
+      XLSX.writeFile(workbook, `Rekap_Presensi_TTQ_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
     function resetPresensiKegiatan(kegiatanId) {
-      if (confirm('Yakin ingin mereset data presensi untuk kegiatan ini?')) {
+      if (confirm('Yakin ingin mereset data presensi kegiatan ini?')) {
         logPresensi = logPresensi.filter(p => p.kegiatanId !== kegiatanId);
         localStorage.setItem('ttq_log_presensi_v3', JSON.stringify(logPresensi));
         renderKegiatanTable();
@@ -726,12 +757,10 @@
       const filter = input.value.toLowerCase();
       const rows = document.getElementById(tableBodyId).getElementsByTagName('tr');
       for (let i = 0; i < rows.length; i++) {
-        const text = rows[i].textContent.toLowerCase();
-        rows[i].style.display = text.includes(filter) ? '' : 'none';
+        rows[i].style.display = rows[i].textContent.toLowerCase().includes(filter) ? '' : 'none';
       }
     }
 
-    // Init awal
     renderDashboardAnalytics();
   </script>
 </body>
