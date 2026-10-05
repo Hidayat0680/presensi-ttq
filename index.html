@@ -8,14 +8,32 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
+<div id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <h1>🌙 TTQ SIDOGIRI</h1>
+    <p>Cabang Pasuruan</p>
+    <input type="text" id="loginUser" placeholder="Username">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="doLogin()">🔐 LOGIN</button>
+    <p style="font-size:12px;margin-top:15px;color:#666">Default Admin:<br><b>Username: admin</b><br><b>Password: admin123</b></p>
+    <div id="loginError" style="color:red;margin-top:10px"></div>
+  </div>
+</div>
+<div id="app" style="display:none">
 <div class="header">
-  <h1>🌙 PRESENSI TTQ SIDOGIRI</h1>
-  <p>Cabang Pasuruan - Sistem ENTER</p>
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <h1 style="margin:0">🌙 PRESENSI TTQ SIDOGIRI</h1>
+      <small>Login: <b id="infoUser"></b> (<span id="infoRole"></span>)</small>
+    </div>
+    <button class="btn btn-danger btn-sm" onclick="doLogout()">🚪 LOGOUT</button>
+  </div>
 </div>
 <div class="tabs">
   <button class="tab active" onclick="openTab('presensi')">Presensi (ENTER)</button>
   <button class="tab" onclick="openTab('master')">Data Master</button>
   <button class="tab" onclick="openTab('laporan')">Laporan</button>
+  <button class="tab" id="tabPenggunaBtn" onclick="openTab('pengguna')">👥 Pengguna</button>
 </div>
 <div id="tab-presensi" class="tab-content active">
   <div class="card">
@@ -24,55 +42,43 @@
     <div id="scanResult"></div>
   </div>
   <div class="card">
-    <div class="card-head">
-      <h3>Rekap Hari Ini: <span id="tglHariIni"></span></h3>
-      <span id="jumlahHadir">0 Hadir</span>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Jam</th><th>IDPPS</th><th>Nama</th><th>Aksi</th></tr></thead>
-        <tbody id="tabelHadirHariIni"></tbody>
-      </table>
-    </div>
+    <div class="card-head"><h3>Rekap Hari Ini: <span id="tglHariIni"></span></h3><span id="jumlahHadir">0 Hadir</span></div>
+    <div class="table-wrap"><table><thead><tr><th>Jam</th><th>IDPPS</th><th>Nama</th><th>Aksi</th></tr></thead><tbody id="tabelHadirHariIni"></tbody></table></div>
     <div class="actions">
-      <button class="btn btn-warning" onclick="hapusHariIni()">🗑️ Hapus Presensi Hari Ini Saja (Uji Coba)</button>
-      <button class="btn btn-danger" onclick="hapusSemuaPresensi()">❌ Hapus SEMUA Riwayat Presensi</button>
+      <button class="btn btn-warning" onclick="hapusHariIni()">🗑️ Hapus Hari Ini</button>
+      <button class="btn btn-danger" onclick="hapusSemuaPresensi()">❌ Hapus SEMUA</button>
     </div>
   </div>
 </div>
 <div id="tab-master" class="tab-content">
   <div class="card">
-    <h3>Data Santri (280)</h3>
-    <p>Total: <b id="totalSantri">0</b> santri</p>
-    <div class="actions">
-      <label class="btn btn-primary">📥 Import Excel<input type="file" id="fileExcel" accept=".xlsx,.xls" hidden></label>
-      <button class="btn btn-danger" onclick="hapusSemuaSantri()">❌ Hapus Semua Data Santri</button>
-    </div>
+    <h3>Data Santri (280)</h3><p>Total: <b id="totalSantri">0</b></p>
+    <div class="actions"><label class="btn btn-primary">📥 Import Excel<input type="file" id="fileExcel" accept=".xlsx,.xls" hidden></label><button class="btn btn-danger" onclick="hapusSemuaSantri()">❌ Hapus Semua</button></div>
     <input type="text" id="cariSantri" placeholder="Cari nama / IDPPS..." onkeyup="renderMaster()">
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>IDPPS</th><th>Nama Santri</th><th>Aksi</th></tr></thead>
-        <tbody id="tabelMaster"></tbody>
-      </table>
-    </div>
+    <div class="table-wrap"><table><thead><tr><th>IDPPS</th><th>Nama</th><th>Aksi</th></tr></thead><tbody id="tabelMaster"></tbody></table></div>
   </div>
 </div>
 <div id="tab-laporan" class="tab-content">
   <div class="card">
-    <h3>Laporan & Export</h3>
-    <input type="date" id="filterTanggal">
-    <button class="btn btn-success" onclick="exportExcel()">📤 Export Excel Laporan</button>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Tanggal</th><th>IDPPS</th><th>Nama</th><th>Jam Hadir</th><th>Aksi</th></tr></thead>
-        <tbody id="tabelLaporan"></tbody>
-      </table>
-    </div>
-    <div class="actions">
-      <button class="btn btn-warning" onclick="hapusTanggalTerpilih()">🗑️ Hapus Data Tanggal Ini Saja</button>
-      <button class="btn btn-danger" onclick="hapusSemuaPresensi()">❌ Hapus SEMUA Data Presensi</button>
-    </div>
+    <h3>Laporan & Export</h3><input type="date" id="filterTanggal"><button class="btn btn-success" onclick="exportExcel()">📤 Export Excel</button>
+    <div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>IDPPS</th><th>Nama</th><th>Jam</th><th>Aksi</th></tr></thead><tbody id="tabelLaporan"></tbody></table></div>
+    <div class="actions"><button class="btn btn-warning" onclick="hapusTanggalTerpilih()">🗑️ Hapus Tanggal Ini</button><button class="btn btn-danger" onclick="hapusSemuaPresensi()">❌ Hapus SEMUA</button></div>
   </div>
+</div>
+<div id="tab-pengguna" class="tab-content">
+  <div class="card">
+    <h3>👥 Manajemen Pengguna</h3>
+    <div style="background:#f9fafb;padding:12px;border-radius:8px;margin:10px 0">
+      <h4>Tambah Pengguna Baru</h4>
+      <input type="text" id="newUser" placeholder="Username baru (misal: ustadzah1)">
+      <input type="text" id="newNama" placeholder="Nama Lengkap">
+      <input type="password" id="newPass" placeholder="Password">
+      <select id="newRole" style="width:100%;padding:12px;border:2px solid #d1fae5;border-radius:8px;margin:10px 0"><option value="petugas">Petugas</option><option value="admin">Admin</option></select>
+      <button class="btn btn-primary" onclick="tambahUser()">➕ Tambah Pengguna</button>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>Username</th><th>Nama</th><th>Role</th><th>Aksi</th></tr></thead><tbody id="tabelPengguna"></tbody></table></div>
+  </div>
+</div>
 </div>
 <script src="app.js"></script>
 </body>
