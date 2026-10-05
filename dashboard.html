@@ -30,10 +30,10 @@
     .btn { padding: 8px 16px; border-radius: 6px; border: none; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
     .btn-primary { background: #00bcd4; color: white; }
     .btn-primary:hover { background: #00acc1; }
-    .btn-success { background: #4caf50; color: white; }
     .btn-secondary { background: #8d8580; color: white; }
     .btn-edit { background: #8bc34a; color: white; padding: 6px 8px; border-radius: 4px; }
     .btn-reload { background: #ff5722; color: white; padding: 6px 8px; border-radius: 4px; }
+    .btn-delete { background: #ef4444; color: white; padding: 6px 8px; border-radius: 4px; }
 
     .card { background: white; border-radius: 10px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
     .card-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #1e293b; display: flex; justify-content: space-between; align-items: center; }
@@ -116,7 +116,7 @@
             <span>Daftar Keaktifan Absensi</span>
             <button class="btn btn-primary" onclick="showTab('kegiatan')"><i class="fa-solid fa-list"></i> Lihat Semua Kegiatan</button>
           </div>
-          <p style="color: #64748b; font-size: 14px;">Silakan kelola kegiatan dan unggah daftar peserta Excel khusus di setiap kegiatan melalui menu **Kegiatan**.</p>
+          <p style="color: #64748b; font-size: 14px;">Silakan kelola kegiatan, unggah daftar peserta Excel, atau hapus kegiatan yang sudah tidak terpakai melalui menu <strong>Kegiatan</strong>.</p>
         </div>
       </div>
 
@@ -125,7 +125,10 @@
         <div class="card">
           <div class="card-title">
             <span>Daftar Kegiatan Master</span>
-            <button class="btn btn-primary" onclick="bukaModalTambah()"><i class="fa-solid fa-plus"></i> Entri F1</button>
+            <div>
+              <button class="btn btn-delete" onclick="hapusTerpilih()"><i class="fa-solid fa-trash"></i> Hapus yang Dipilih</button>
+              <button class="btn btn-primary" onclick="bukaModalTambah()"><i class="fa-solid fa-plus"></i> Entri F1</button>
+            </div>
           </div>
 
           <div class="search-filter-bar">
@@ -136,12 +139,12 @@
           <table>
             <thead>
               <tr>
-                <th width="40"><input type="checkbox"></th>
+                <th width="40"><input type="checkbox" id="check-all" onclick="toggleSelectAll(this)"></th>
                 <th width="40">No</th>
                 <th>Kegiatan</th>
                 <th>Peserta</th>
                 <th>Tanggal</th>
-                <th width="90" style="text-align: center;">Aksi</th>
+                <th width="150" style="text-align: center;">Aksi</th>
               </tr>
             </thead>
             <tbody id="table-kegiatan-body">
@@ -212,7 +215,7 @@
     </div>
   </div>
 
-  <!-- MODAL EDIT / TAMBAH KEGIATAN (PERSIS GAMBAR DARI USER) -->
+  <!-- MODAL EDIT / TAMBAH KEGIATAN -->
   <div class="modal-overlay" id="modal-kegiatan">
     <div class="modal">
       <div class="modal-header">
@@ -261,7 +264,7 @@
 
   <script>
     // Initial Data Default
-    let listKegiatan = JSON.parse(localStorage.getItem('ttq_kegiatan_v2')) || [
+    let listKegiatan = JSON.parse(localStorage.getItem('ttq_kegiatan_v3')) || JSON.parse(localStorage.getItem('ttq_kegiatan_v2')) || [
       { id: 1, nama: "Pelantikan Juri Mtq", tanggal: "Hari Ini", pesertaList: [] },
       { id: 2, nama: "Koordinasi Kontroling", tanggal: "Hari Ini", pesertaList: [] },
       { id: 3, nama: "Pemaduan Muallim", tanggal: "Hari Ini", pesertaList: [] },
@@ -270,7 +273,7 @@
       { id: 6, nama: "Koordinasi Sesi 2", tanggal: "Esok Hari", pesertaList: [] }
     ];
 
-    let logPresensi = JSON.parse(localStorage.getItem('ttq_log_presensi_v2')) || [];
+    let logPresensi = JSON.parse(localStorage.getItem('ttq_log_presensi_v3')) || JSON.parse(localStorage.getItem('ttq_log_presensi_v2')) || [];
 
     // Navigasi Tab
     function showTab(tabName) {
@@ -342,7 +345,6 @@
         kegObj.tanggal = tglText;
       }
 
-      // Jika ada upload file excel
       if (fileInput.files.length > 0) {
         const file = fileInput.files[0];
         const reader = new FileReader();
@@ -353,14 +355,14 @@
           const worksheet = workbook.Sheets[firstSheet];
           
           kegObj.pesertaList = XLSX.utils.sheet_to_json(worksheet);
-          localStorage.setItem('ttq_kegiatan_v2', JSON.stringify(listKegiatan));
+          localStorage.setItem('ttq_kegiatan_v3', JSON.stringify(listKegiatan));
           alert('Data kegiatan & file Excel peserta berhasil disimpan!');
           tutupModal();
           renderKegiatanTable();
         };
         reader.readAsArrayBuffer(file);
       } else {
-        localStorage.setItem('ttq_kegiatan_v2', JSON.stringify(listKegiatan));
+        localStorage.setItem('ttq_kegiatan_v3', JSON.stringify(listKegiatan));
         alert('Data kegiatan berhasil disimpan!');
         tutupModal();
         renderKegiatanTable();
@@ -372,30 +374,83 @@
       const tbody = document.getElementById('table-kegiatan-body');
       tbody.innerHTML = '';
 
+      if (listKegiatan.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #94a3b8;">Belum ada kegiatan. Klik tombol Entri F1 untuk menambah kegiatan.</td></tr>';
+        return;
+      }
+
       listKegiatan.forEach((item, index) => {
         const totalPeserta = item.pesertaList ? item.pesertaList.length : 0;
         const countHadir = logPresensi.filter(p => p.kegiatanId === item.id).length;
 
         tbody.innerHTML += `
           <tr>
-            <td><input type="checkbox"></td>
+            <td><input type="checkbox" class="check-item" value="${item.id}"></td>
             <td>${index + 1}</td>
             <td><strong>${item.nama}</strong></td>
             <td>${totalPeserta} Santri (${countHadir} Aktif, 0 Izin/Sakit)</td>
             <td>Tgl ${item.tanggal}</td>
-            <td style="text-align: center;">
+            <td style="text-align: center; white-space: nowrap;">
               <button class="btn btn-reload" title="Reset Presensi" onclick="resetPresensiKegiatan(${item.id})"><i class="fa-solid fa-rotate-right"></i></button>
               <button class="btn btn-edit" title="Edit Kegiatan & Peserta" onclick="bukaModalEdit(${item.id})"><i class="fa-solid fa-pen"></i></button>
+              <button class="btn btn-delete" title="Hapus Kegiatan" onclick="hapusKegiatan(${item.id}, '${item.nama}')"><i class="fa-solid fa-trash"></i></button>
             </td>
           </tr>
         `;
       });
     }
 
+    // Toggle Check All
+    function toggleSelectAll(source) {
+      const checkboxes = document.querySelectorAll('.check-item');
+      checkboxes.forEach(cb => cb.checked = source.checked);
+    }
+
+    // Hapus Kegiatan Tunggal
+    function hapusKegiatan(id, namaKegiatan) {
+      if (confirm(`Apakah Anda yakin ingin menghapus kegiatan "${namaKegiatan}"?`)) {
+        listKegiatan = listKegiatan.filter(k => k.id !== id);
+        logPresensi = logPresensi.filter(p => p.kegiatanId !== id);
+
+        localStorage.setItem('ttq_kegiatan_v3', JSON.stringify(listKegiatan));
+        localStorage.setItem('ttq_log_presensi_v3', JSON.stringify(logPresensi));
+
+        renderKegiatanTable();
+      }
+    }
+
+    // Hapus Banyak Kegiatan Terpilih (Kotak Tandai)
+    function hapusTerpilih() {
+      const checkedBoxes = document.querySelectorAll('.check-item:checked');
+      if (checkedBoxes.length === 0) {
+        alert('Tandai/centang minimal satu kegiatan yang ingin dihapus!');
+        return;
+      }
+
+      if (confirm(`Apakah Anda yakin ingin menghapus ${checkedBoxes.length} kegiatan yang ditandai?`)) {
+        const idsToHapus = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
+        
+        listKegiatan = listKegiatan.filter(k => !idsToHapus.includes(k.id));
+        logPresensi = logPresensi.filter(p => !idsToHapus.includes(p.kegiatanId));
+
+        localStorage.setItem('ttq_kegiatan_v3', JSON.stringify(listKegiatan));
+        localStorage.setItem('ttq_log_presensi_v3', JSON.stringify(logPresensi));
+
+        document.getElementById('check-all').checked = false;
+        renderKegiatanTable();
+      }
+    }
+
     // Update Dropdown Presensi
     function updateSelectKegiatan() {
       const select = document.getElementById('select-kegiatan-presensi');
       select.innerHTML = '';
+      
+      if (listKegiatan.length === 0) {
+        select.innerHTML = '<option value="">-- Tidak ada kegiatan --</option>';
+        return;
+      }
+
       listKegiatan.forEach(k => {
         select.innerHTML += `<option value="${k.id}">${k.nama}</option>`;
       });
@@ -412,9 +467,11 @@
         if (!idPps) return;
 
         const kegiatanObj = listKegiatan.find(k => k.id === kegiatanId);
-        if (!kegiatanObj) return;
+        if (!kegiatanObj) {
+          alert('Pilih kegiatan yang valid terlebih dahulu!');
+          return;
+        }
 
-        // Cari di pesertaList khusus kegiatan ini
         const listPeserta = kegiatanObj.pesertaList || [];
         const pesertaFound = listPeserta.find(p => (p.ID || p.id || p.NIP || '').toString() === idPps);
 
@@ -444,7 +501,7 @@
             waktu: new Date().toLocaleTimeString()
           });
 
-          localStorage.setItem('ttq_log_presensi_v2', JSON.stringify(logPresensi));
+          localStorage.setItem('ttq_log_presensi_v3', JSON.stringify(logPresensi));
 
           alertBox.style.background = '#dcfce7';
           alertBox.style.color = '#166534';
@@ -458,7 +515,13 @@
 
     function renderLogPresensi() {
       const tbody = document.getElementById('table-log-presensi');
-      const kegiatanId = parseInt(document.getElementById('select-kegiatan-presensi').value);
+      const selectVal = document.getElementById('select-kegiatan-presensi').value;
+      if (!selectVal) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #94a3b8;">Belum ada kegiatan terpilih.</td></tr>';
+        return;
+      }
+
+      const kegiatanId = parseInt(selectVal);
       const filtered = logPresensi.filter(p => p.kegiatanId === kegiatanId);
 
       if (filtered.length === 0) {
@@ -503,7 +566,7 @@
     function resetPresensiKegiatan(kegiatanId) {
       if (confirm('Yakin ingin mereset data presensi untuk kegiatan ini?')) {
         logPresensi = logPresensi.filter(p => p.kegiatanId !== kegiatanId);
-        localStorage.setItem('ttq_log_presensi_v2', JSON.stringify(logPresensi));
+        localStorage.setItem('ttq_log_presensi_v3', JSON.stringify(logPresensi));
         renderKegiatanTable();
       }
     }
