@@ -3,65 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Absensi TTQ - Management System</title>
+  <title>Absensi TTQ - Management & Analytics Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { display: flex; background: #f4f6f9; color: #334155; height: 100vh; overflow: hidden; }
+    body { display: flex; background: #0b132b; color: #e0e6ed; height: 100vh; overflow: hidden; }
 
-    /* Sidebar */
-    .sidebar { width: 250px; background: #ffffff; border-right: 1px solid #e2e8f0; height: 100vh; display: flex; flex-direction: column; }
-    .sidebar-brand { padding: 20px; font-weight: bold; font-size: 16px; color: #00bcd4; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
-    .sidebar-brand span { background: #e0f2fe; padding: 4px 10px; border-radius: 12px; font-size: 12px; }
+    /* Sidebar Dark */
+    .sidebar { width: 250px; background: #1c2541; border-right: 1px solid #2a385b; height: 100vh; display: flex; flex-direction: column; }
+    .sidebar-brand { padding: 20px; font-weight: bold; font-size: 16px; color: #00f2fe; background: #111827; border-bottom: 1px solid #2a385b; display: flex; align-items: center; justify-content: space-between; }
+    .sidebar-brand span { background: #00f2fe22; color: #00f2fe; padding: 4px 10px; border-radius: 12px; font-size: 12px; border: 1px solid #00f2fe88; }
     .menu { list-style: none; padding: 15px 10px; flex: 1; overflow-y: auto; }
-    .menu-header { font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: bold; padding: 10px 12px 5px; }
+    .menu-header { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; padding: 10px 12px 5px; }
     .menu-item { margin-bottom: 4px; }
-    .menu-item a { text-decoration: none; color: #475569; padding: 10px 14px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; cursor: pointer; transition: all 0.2s; }
-    .menu-item a:hover, .menu-item a.active { background: #00bcd4; color: white; }
+    .menu-item a { text-decoration: none; color: #94a3b8; padding: 10px 14px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+    .menu-item a:hover, .menu-item a.active { background: linear-gradient(90deg, #00c6ff, #0072ff); color: white; box-shadow: 0 4px 12px rgba(0, 198, 255, 0.3); }
 
     /* Content Area */
     .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .topbar { height: 60px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 25px; }
-    .main-body { flex: 1; padding: 25px; overflow-y: auto; }
+    .topbar { height: 60px; background: #1c2541; border-bottom: 1px solid #2a385b; display: flex; align-items: center; justify-content: space-between; padding: 0 25px; }
+    .main-body { flex: 1; padding: 20px; overflow-y: auto; }
 
     /* Buttons */
     .btn { padding: 8px 16px; border-radius: 6px; border: none; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
-    .btn-primary { background: #00bcd4; color: white; }
-    .btn-primary:hover { background: #00acc1; }
-    .btn-secondary { background: #8d8580; color: white; }
-    .btn-edit { background: #8bc34a; color: white; padding: 6px 8px; border-radius: 4px; }
-    .btn-reload { background: #ff5722; color: white; padding: 6px 8px; border-radius: 4px; }
+    .btn-primary { background: linear-gradient(90deg, #00c6ff, #0072ff); color: white; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-secondary { background: #475569; color: white; }
+    .btn-edit { background: #10b981; color: white; padding: 6px 8px; border-radius: 4px; }
+    .btn-reload { background: #f59e0b; color: white; padding: 6px 8px; border-radius: 4px; }
     .btn-delete { background: #ef4444; color: white; padding: 6px 8px; border-radius: 4px; }
 
-    .card { background: white; border-radius: 10px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-    .card-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #1e293b; display: flex; justify-content: space-between; align-items: center; }
+    /* Dark Cards & Metric Gauges */
+    .card { background: #1c2541; border-radius: 12px; border: 1px solid #2a385b; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .card-title { font-size: 15px; font-weight: 600; margin-bottom: 15px; color: #38bdf8; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a385b; padding-bottom: 10px; }
 
+    /* Analytics Grid Layout */
+    .analytics-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+    .metric-card { background: #151d36; border: 1px solid #2a385b; border-radius: 12px; padding: 15px; text-align: center; }
+    .metric-value { font-size: 28px; font-weight: bold; color: #00f2fe; margin: 10px 0 5px; }
+    .metric-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .dashboard-grid-full { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+
+    /* Form & Tables */
     .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #1e293b; }
-    .form-control { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #cbd5e1; }
+    .form-control { width: 100%; padding: 10px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; font-size: 14px; color: #f8fafc; outline: none; }
+    .form-control:focus { border-color: #38bdf8; }
 
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border-bottom: 1px solid #f1f5f9; padding: 12px 10px; text-align: left; font-size: 14px; }
-    th { background: #f8fafc; color: #475569; font-weight: 600; }
+    th, td { border-bottom: 1px solid #2a385b; padding: 12px 10px; text-align: left; font-size: 13px; color: #cbd5e1; }
+    th { background: #0f172a; color: #38bdf8; font-weight: 600; }
 
     .search-filter-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     .search-input { width: 250px; }
 
-    /* Modal Overlay & Box */
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1000; justify-content: center; align-items: center; }
+    /* Modal Overlay & Box Dark */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
     .modal-overlay.active { display: flex; }
-    .modal { background: white; border-radius: 8px; width: 480px; max-width: 90%; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-    .modal-header { padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
-    .modal-header h3 { color: #1e293b; font-size: 18px; font-weight: 600; }
+    .modal { background: #1c2541; border: 1px solid #3b82f6; border-radius: 12px; width: 480px; max-width: 90%; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .modal-header { padding: 16px 20px; border-bottom: 1px solid #2a385b; display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h3 { color: #38bdf8; font-size: 18px; font-weight: 600; }
     .modal-close { background: none; border: none; font-size: 20px; color: #94a3b8; cursor: pointer; }
     .modal-body { padding: 20px; }
-    .modal-footer { padding: 15px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px; }
+    .modal-footer { padding: 15px 20px; border-top: 1px solid #2a385b; display: flex; justify-content: flex-end; gap: 10px; }
 
-    /* Scan Box */
-    .scan-box { background: #e0f2fe; border: 2px dashed #0284c7; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
-    .scan-input { font-size: 20px; text-align: center; letter-spacing: 2px; font-weight: bold; }
+    /* Scan Box Dark */
+    .scan-box { background: #0f172a; border: 2px dashed #0284c7; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
+    .scan-input { font-size: 20px; text-align: center; letter-spacing: 2px; font-weight: bold; background: #1e293b; color: #38bdf8; }
   </style>
 </head>
 <body>
@@ -75,14 +87,14 @@
     <ul class="menu">
       <li class="menu-item">
         <a id="nav-dashboard" class="active" onclick="showTab('dashboard')">
-          <span><i class="fa-solid fa-gauge fa-fw"></i> Dashboard</span>
+          <span><i class="fa-solid fa-chart-pie fa-fw"></i> Monitoring Dashboard</span>
         </a>
       </li>
       
       <li class="menu-header">Data Master</li>
       <li class="menu-item">
         <a id="nav-kegiatan" onclick="showTab('kegiatan')">
-          <span><i class="fa-solid fa-list-check fa-fw"></i> Kegiatan</span>
+          <span><i class="fa-solid fa-list-check fa-fw"></i> Data Kegiatan</span>
         </a>
       </li>
 
@@ -103,24 +115,82 @@
   <!-- CONTENT -->
   <div class="content">
     <div class="topbar">
-      <div><strong>Dashboard Keaktifan Absensi</strong></div>
-      <div><i class="fa-solid fa-user-circle"></i> M. HIDAYATULLOH</div>
+      <div><strong style="color: #38bdf8;"><i class="fa-solid fa-display"></i> System Monitoring & Analytics</strong></div>
+      <div style="font-size: 14px;"><i class="fa-solid fa-user-circle"></i> M. HIDAYATULLOH</div>
     </div>
 
     <div class="main-body">
 
-      <!-- TAB DASHBOARD -->
+      <!-- TAB DASHBOARD ANALYTICS (Model Sesuai Gambar Referensi) -->
       <div id="tab-dashboard">
+        
+        <!-- Top Metrics (3 Ring Stat Gauges) -->
+        <div class="analytics-row">
+          <div class="metric-card">
+            <div class="metric-label">Total Target Peserta</div>
+            <div class="metric-value" id="dash-total-peserta">0</div>
+            <div style="font-size: 11px; color: #64748b;">Terdaftar dari File Excel</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Peserta Hadir</div>
+            <div class="metric-value" style="color: #10b981;" id="dash-total-hadir">0</div>
+            <div style="font-size: 11px; color: #64748b;">Berhasil Scan Presensi</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Persentase Kehadiran</div>
+            <div class="metric-value" style="color: #f59e0b;" id="dash-persen-hadir">0%</div>
+            <div style="font-size: 11px; color: #64748b;">Tingkat Keaktifan Real-time</div>
+          </div>
+        </div>
+
+        <!-- Dashboard Charts Grid -->
+        <div class="dashboard-grid-full" style="margin-bottom: 20px;">
+          <!-- Grafik Batang Kehadiran per Kegiatan -->
+          <div class="card">
+            <div class="card-title">
+              <span><i class="fa-solid fa-chart-column"></i> Kehadiran Peserta per Kegiatan</span>
+            </div>
+            <div style="height: 230px;">
+              <canvas id="chartBarKegiatan"></canvas>
+            </div>
+          </div>
+
+          <!-- Donut Chart Kehadiran -->
+          <div class="card">
+            <div class="card-title">
+              <span><i class="fa-solid fa-chart-pie"></i> Ratio Kehadiran Global</span>
+            </div>
+            <div style="height: 230px; display: flex; justify-content: center;">
+              <canvas id="chartDonutHadir"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Real-time Scan Table -->
         <div class="card">
           <div class="card-title">
-            <span>Daftar Keaktifan Absensi</span>
-            <button class="btn btn-primary" onclick="showTab('kegiatan')"><i class="fa-solid fa-list"></i> Lihat Semua Kegiatan</button>
+            <span><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Real-time Presensi Data Log</span>
+            <button class="btn btn-primary" onclick="showTab('presensi')"><i class="fa-solid fa-qrcode"></i> Buka Terminal Scan</button>
           </div>
-          <p style="color: #64748b; font-size: 14px;">Silakan kelola kegiatan, unggah daftar peserta Excel, atau hapus kegiatan yang sudah tidak terpakai melalui menu <strong>Kegiatan</strong>.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Waktu Scan</th>
+                <th>ID PPS</th>
+                <th>Nama Peserta</th>
+                <th>Kegiatan</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="dash-table-live">
+              <!-- Live Log -->
+            </tbody>
+          </table>
         </div>
+
       </div>
 
-      <!-- TAB KEGIATAN -->
+      <!-- TAB KEGIATAN MASTER -->
       <div id="tab-kegiatan" style="display: none;">
         <div class="card">
           <div class="card-title">
@@ -132,7 +202,7 @@
           </div>
 
           <div class="search-filter-bar">
-            <div>Show <select><option>10</option></select> entries</div>
+            <div>Show <select class="form-control" style="width: auto; display: inline-block;"><option>10</option></select> entries</div>
             <div>Search: <input type="text" class="form-control search-input" onkeyup="filterTable(this, 'table-kegiatan-body')"></div>
           </div>
 
@@ -157,18 +227,18 @@
       <!-- TAB PRESENSI -->
       <div id="tab-presensi" style="display: none;">
         <div class="card">
-          <div class="card-title"><span>Isi Presensi Kegiatan</span></div>
+          <div class="card-title"><span>Terminal Presensi Kegiatan</span></div>
 
           <div class="form-group">
             <label>Pilih Kegiatan Target Presensi:</label>
-            <select id="select-kegiatan-presensi" class="form-control" style="font-weight: bold; color: #00bcd4;" onchange="renderLogPresensi()">
+            <select id="select-kegiatan-presensi" class="form-control" style="font-weight: bold; color: #38bdf8;" onchange="renderLogPresensi()">
               <!-- Auto filled -->
             </select>
           </div>
 
           <div class="scan-box">
-            <h3 style="margin-bottom: 10px; color: #0369a1;"><i class="fa-solid fa-barcode"></i> Masukkan / Scan ID PPS</h3>
-            <p style="font-size: 13px; color: #0284c7; margin-bottom: 15px;">Ketik ID PPS lalu tekan Enter untuk menyimpan presensi.</p>
+            <h3 style="margin-bottom: 10px; color: #38bdf8;"><i class="fa-solid fa-barcode"></i> Masukkan / Scan ID PPS</h3>
+            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px;">Ketik ID PPS lalu tekan Enter untuk menyimpan presensi.</p>
             <input type="text" id="input-id-pps" class="form-control scan-input" placeholder="Masukkan ID PPS..." onkeydown="checkInputId(event)">
           </div>
 
@@ -238,10 +308,6 @@
           </select>
         </div>
 
-        <div style="margin-bottom: 15px;">
-          <a href="#" style="color: #4dd0e1; text-decoration: none; font-size: 13px; font-weight: 500;">+ Atur batas hadir (opsional)</a>
-        </div>
-
         <div class="form-group">
           <label>*Metode Entri Data Peserta :</label>
           <select class="form-control">
@@ -250,21 +316,21 @@
         </div>
 
         <div class="form-group">
-          <label>File Excel</label>
+          <label>File Excel Peserta (.xlsx / .xls)</label>
           <input type="file" id="modal-excel-file" class="form-control" accept=".xlsx, .xls">
-          <span id="excel-status" style="font-size: 12px; color: #166534; display: block; margin-top: 4px;"></span>
+          <span id="excel-status" style="font-size: 12px; color: #10b981; display: block; margin-top: 4px;"></span>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="tutupModal()">Tutup</button>
-        <button class="btn btn-primary" style="background: #4dd0e1;" onclick="simpanDataKegiatan()">Simpan</button>
+        <button class="btn btn-primary" onclick="simpanDataKegiatan()">Simpan</button>
       </div>
     </div>
   </div>
 
   <script>
     // Initial Data Default
-    let listKegiatan = JSON.parse(localStorage.getItem('ttq_kegiatan_v3')) || JSON.parse(localStorage.getItem('ttq_kegiatan_v2')) || [
+    let listKegiatan = JSON.parse(localStorage.getItem('ttq_kegiatan_v3')) || [
       { id: 1, nama: "Pelantikan Juri Mtq", tanggal: "Hari Ini", pesertaList: [] },
       { id: 2, nama: "Koordinasi Kontroling", tanggal: "Hari Ini", pesertaList: [] },
       { id: 3, nama: "Pemaduan Muallim", tanggal: "Hari Ini", pesertaList: [] },
@@ -273,7 +339,10 @@
       { id: 6, nama: "Koordinasi Sesi 2", tanggal: "Esok Hari", pesertaList: [] }
     ];
 
-    let logPresensi = JSON.parse(localStorage.getItem('ttq_log_presensi_v3')) || JSON.parse(localStorage.getItem('ttq_log_presensi_v2')) || [];
+    let logPresensi = JSON.parse(localStorage.getItem('ttq_log_presensi_v3')) || [];
+
+    let chartBarInstance = null;
+    let chartDonutInstance = null;
 
     // Navigasi Tab
     function showTab(tabName) {
@@ -284,9 +353,98 @@
         if (navEl) navEl.classList.toggle('active', t === tabName);
       });
 
+      if (tabName === 'dashboard') renderDashboardAnalytics();
       if (tabName === 'kegiatan') renderKegiatanTable();
       if (tabName === 'presensi') updateSelectKegiatan();
       if (tabName === 'riwayat') renderRekapSemua();
+    }
+
+    // Render Dashboard Analytics (Grafik & Stat Gauge)
+    function renderDashboardAnalytics() {
+      let totalPesertaTarget = 0;
+      listKegiatan.forEach(k => {
+        totalPesertaTarget += (k.pesertaList ? k.pesertaList.length : 0);
+      });
+
+      const totalHadir = logPresensi.length;
+      const persen = totalPesertaTarget > 0 ? Math.round((totalHadir / totalPesertaTarget) * 100) : 0;
+
+      document.getElementById('dash-total-peserta').innerText = totalPesertaTarget;
+      document.getElementById('dash-total-hadir').innerText = totalHadir;
+      document.getElementById('dash-persen-hadir').innerText = persen + '%';
+
+      // Render Live Table Log Dashboard
+      const liveTable = document.getElementById('dash-table-live');
+      liveTable.innerHTML = '';
+      if (logPresensi.length === 0) {
+        liveTable.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748b;">Belum ada presensi yang tercatat.</td></tr>';
+      } else {
+        logPresensi.slice(0, 5).forEach(p => {
+          liveTable.innerHTML += `
+            <tr>
+              <td>${p.waktu}</td>
+              <td><strong style="color: #00f2fe;">${p.idPps}</strong></td>
+              <td>${p.nama}</td>
+              <td>${p.kegiatanNama}</td>
+              <td><span style="background: #10b98122; color: #10b981; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; border: 1px solid #10b98155;">Hadir</span></td>
+            </tr>
+          `;
+        });
+      }
+
+      // Render Charts
+      initCharts(totalPesertaTarget, totalHadir);
+    }
+
+    function initCharts(totalTarget, totalHadir) {
+      // Bar Chart - Kehadiran per Kegiatan
+      const labels = listKegiatan.map(k => k.nama.length > 15 ? k.nama.substring(0, 15) + '...' : k.nama);
+      const dataHadir = listKegiatan.map(k => logPresensi.filter(p => p.kegiatanId === k.id).length);
+
+      const ctxBar = document.getElementById('chartBarKegiatan').getContext('2d');
+      if (chartBarInstance) chartBarInstance.destroy();
+      chartBarInstance = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Jumlah Hadir',
+            data: dataHadir,
+            backgroundColor: '#00c6ff',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: '#94a3b8', precision: 0 }, grid: { color: '#2a385b' } }
+          }
+        }
+      });
+
+      // Donut Chart
+      const belumHadir = Math.max(0, totalTarget - totalHadir);
+      const ctxDonut = document.getElementById('chartDonutHadir').getContext('2d');
+      if (chartDonutInstance) chartDonutInstance.destroy();
+      chartDonutInstance = new Chart(ctxDonut, {
+        type: 'doughnut',
+        data: {
+          labels: ['Hadir', 'Belum Hadir'],
+          datasets: [{
+            data: [totalHadir, belumHadir],
+            backgroundColor: ['#10b981', '#334155'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1' } } }
+        }
+      });
     }
 
     // Modal Control
@@ -319,7 +477,7 @@
       document.getElementById('modal-kegiatan').classList.remove('active');
     }
 
-    // Simpan Data dari Modal
+    // Simpan Data
     function simpanDataKegiatan() {
       const id = document.getElementById('edit-kegiatan-id').value;
       const nama = document.getElementById('modal-nama-kegiatan').value;
@@ -335,12 +493,10 @@
       let kegObj = id ? listKegiatan.find(k => k.id == id) : null;
 
       if (!kegObj) {
-        // Kegiatan Baru
         const newId = listKegiatan.length > 0 ? listKegiatan[listKegiatan.length - 1].id + 1 : 1;
         kegObj = { id: newId, nama: nama, tanggal: tglText, pesertaList: [] };
         listKegiatan.push(kegObj);
       } else {
-        // Edit Kegiatan
         kegObj.nama = nama;
         kegObj.tanggal = tglText;
       }
@@ -375,7 +531,7 @@
       tbody.innerHTML = '';
 
       if (listKegiatan.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #94a3b8;">Belum ada kegiatan. Klik tombol Entri F1 untuk menambah kegiatan.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #64748b;">Belum ada kegiatan. Klik tombol Entri F1 untuk menambah kegiatan.</td></tr>';
         return;
       }
 
@@ -400,13 +556,11 @@
       });
     }
 
-    // Toggle Check All
     function toggleSelectAll(source) {
       const checkboxes = document.querySelectorAll('.check-item');
       checkboxes.forEach(cb => cb.checked = source.checked);
     }
 
-    // Hapus Kegiatan Tunggal
     function hapusKegiatan(id, namaKegiatan) {
       if (confirm(`Apakah Anda yakin ingin menghapus kegiatan "${namaKegiatan}"?`)) {
         listKegiatan = listKegiatan.filter(k => k.id !== id);
@@ -419,7 +573,6 @@
       }
     }
 
-    // Hapus Banyak Kegiatan Terpilih (Kotak Tandai)
     function hapusTerpilih() {
       const checkedBoxes = document.querySelectorAll('.check-item:checked');
       if (checkedBoxes.length === 0) {
@@ -441,7 +594,6 @@
       }
     }
 
-    // Update Dropdown Presensi
     function updateSelectKegiatan() {
       const select = document.getElementById('select-kegiatan-presensi');
       select.innerHTML = '';
@@ -457,7 +609,6 @@
       renderLogPresensi();
     }
 
-    // Check Input ID PPS Saat Presensi
     function checkInputId(event) {
       if (event.key === 'Enter') {
         const idInput = document.getElementById('input-id-pps');
@@ -479,8 +630,8 @@
         alertBox.style.display = 'block';
 
         if (!pesertaFound) {
-          alertBox.style.background = '#fee2e2';
-          alertBox.style.color = '#991b1b';
+          alertBox.style.background = '#450a0a';
+          alertBox.style.color = '#fca5a5';
           alertBox.innerText = '❌ ID PPS ' + idPps + ' TIDAK TERDAFTAR dalam kegiatan ' + kegiatanObj.nama + '!';
           idInput.value = '';
           return;
@@ -489,8 +640,8 @@
         const isAlready = logPresensi.some(p => p.idPps === idPps && p.kegiatanId === kegiatanId);
 
         if (isAlready) {
-          alertBox.style.background = '#fef3c7';
-          alertBox.style.color = '#92400e';
+          alertBox.style.background = '#451a03';
+          alertBox.style.color = '#fcd34d';
           alertBox.innerText = '⚠️ ID ' + idPps + ' (' + (pesertaFound.Nama || pesertaFound.nama) + ') sudah presensi sebelumnya!';
         } else {
           logPresensi.unshift({
@@ -503,8 +654,8 @@
 
           localStorage.setItem('ttq_log_presensi_v3', JSON.stringify(logPresensi));
 
-          alertBox.style.background = '#dcfce7';
-          alertBox.style.color = '#166534';
+          alertBox.style.background = '#064e3b';
+          alertBox.style.color = '#6ee7b7';
           alertBox.innerText = '✅ Presensi Berhasil: ' + (pesertaFound.Nama || pesertaFound.nama);
           renderLogPresensi();
         }
@@ -517,7 +668,7 @@
       const tbody = document.getElementById('table-log-presensi');
       const selectVal = document.getElementById('select-kegiatan-presensi').value;
       if (!selectVal) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #94a3b8;">Belum ada kegiatan terpilih.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #64748b;">Belum ada kegiatan terpilih.</td></tr>';
         return;
       }
 
@@ -525,7 +676,7 @@
       const filtered = logPresensi.filter(p => p.kegiatanId === kegiatanId);
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #94a3b8;">Belum ada presensi pada kegiatan ini.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #64748b;">Belum ada presensi pada kegiatan ini.</td></tr>';
         return;
       }
 
@@ -534,9 +685,9 @@
         tbody.innerHTML += `
           <tr>
             <td>${log.waktu}</td>
-            <td><strong>${log.idPps}</strong></td>
+            <td><strong style="color: #00f2fe;">${log.idPps}</strong></td>
             <td>${log.nama}</td>
-            <td><span style="background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 12px;">Hadir</span></td>
+            <td><span style="background: #10b98122; color: #10b981; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px;">Hadir</span></td>
           </tr>
         `;
       });
@@ -545,7 +696,7 @@
     function renderRekapSemua() {
       const tbody = document.getElementById('table-rekap-semua');
       if (logPresensi.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8;">Belum ada data presensi.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748b;">Belum ada data presensi.</td></tr>';
         return;
       }
 
@@ -581,7 +732,7 @@
     }
 
     // Init awal
-    renderKegiatanTable();
+    renderDashboardAnalytics();
   </script>
 </body>
 </html>
