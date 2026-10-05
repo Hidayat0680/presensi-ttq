@@ -3,256 +3,199 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Presensi TTQ Sidogiri - Lengkap</title>
+<title>Login - Personalia TTQ Sidogiri</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-*{box-sizing:border-box;font-family:'Segoe UI',sans-serif}
-body{margin:0;background:#f0fdf4}
-.header{background:linear-gradient(135deg,#065f46,#10b981);color:#fff;padding:15px 20px}
-.tabs{display:flex;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.1);overflow-x:auto}
-.tab{flex:1;min-width:100px;padding:14px;border:none;background:#fff;cursor:pointer;font-weight:bold;white-space:nowrap}
-.tab.active{background:#065f46;color:#fff}
-.tab-content{display:none;padding:12px}.tab-content.active{display:block}
-.card{background:#fff;border-radius:12px;padding:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.07)}
-input,select{width:100%;padding:10px;border:2px solid #d1fae5;border-radius:8px;margin:6px 0;font-size:14px}
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:600px}
-th,td{padding:8px;border-bottom:1px solid #eee;text-align:left;font-size:13px}
-th{background:#ecfdf5;position:sticky;top:0}
-.btn{padding:8px 12px;border:none;border-radius:8px;cursor:pointer;font-weight:bold;margin:4px 2px;font-size:13px}
-.btn-primary{background:#10b981;color:#fff}.btn-success{background:#059669;color:#fff}.btn-warning{background:#f59e0b;color:#fff}.btn-danger{background:#ef4444;color:#fff}.btn-sm{padding:5px 8px;font-size:11px}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-@media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+*{box-sizing:border-box;font-family:'Segoe UI',sans-serif;margin:0;padding:0}
+body{background:#eef4f8}
+/* LOGIN STYLE PERSIS SCREENSHOT */
+.login-wrap{min-height:100vh;display:flex;justify-content:center;align-items:center;background:#eef4f8;padding:20px}
+.login-card{background:#fff;width:100%;max-width:420px;border-radius:20px;padding:32px 28px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
+.login-card h2{font-size:22px;color:#111827;margin-bottom:4px;font-weight:700}
+.login-card p.sub{color:#6b7280;font-size:13px;margin-bottom:18px}
+.alert-success{background:#e6f9ed;border:1px solid #b8e6c8;color:#1f6d3a;padding:10px 14px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.input-group{display:flex;margin-bottom:12px;border:1px solid #d1d5db;border-radius:10px;overflow:hidden;background:#fff}
+.input-group:focus-within{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+.input-icon{width:48px;display:flex;justify-content:center;align-items:center;background:#f3f4f6;color:#6b7280}
+.input-icon.green{background:#d1fae5;color:#065f46}
+.input-group input{flex:1;border:none;padding:12px 14px;font-size:14px;outline:none}
+.btn-masuk{width:100%;background:linear-gradient(135deg,#059669,#0d9488);color:#fff;border:none;padding:13px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;margin-top:10px;box-shadow:0 4px 12px rgba(5,150,105,.3)}
+.btn-masuk:hover{opacity:.9}
+.footer-login{text-align:center;color:#9ca3af;font-size:11px;margin-top:18px}
+/* DASHBOARD */
+.dashboard{display:none;min-height:100vh;background:#f5f7fb}
+.sidebar{width:240px;background:#fff;border-right:1px solid #e5e7eb;position:fixed;height:100vh;overflow-y:auto}
+.sidebar h2{color:#10b981;padding:20px 20px 10px;font-size:18px}
+.nav-title{font-size:11px;color:#9ca3af;padding:15px 20px 5px;font-weight:bold}
+.nav-item{display:flex;align-items:center;padding:10px 20px;color:#4b5563;cursor:pointer;font-size:14px;border-left:3px solid transparent}
+.nav-item.active,.nav-item:hover{background:#ecfdf5;color:#065f46;border-left-color:#10b981;font-weight:bold}
+.main{margin-left:240px;flex:1}
+.topbar{background:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e5e7eb;position:sticky;top:0;z-index:5;font-size:13px}
+.content{padding:20px}
+.welcome{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:12px 16px;border-radius:8px;margin-bottom:20px;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.stat{padding:18px;border-radius:12px;color:#fff;display:flex;justify-content:space-between;align-items:center}
+.stat.green{background:linear-gradient(135deg,#10b981,#059669)}.stat.teal{background:linear-gradient(135deg,#14b8a6,#0891b2)}.stat.blue{background:linear-gradient(135deg,#3b82f6,#1d4ed8)}.stat.orange{background:linear-gradient(135deg,#f59e0b,#ea580c)}
+.num{font-size:26px;font-weight:bold}
+.charts{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px}
+.card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:12px}
+.table-wrap{overflow-x:auto} table{width:100%;border-collapse:collapse;min-width:600px} th,td{padding:8px;border-bottom:1px solid #f3f4f6;font-size:13px;text-align:left} th{background:#f9fafb;font-size:11px;color:#6b7280;text-transform:uppercase}
+.btn{padding:7px 12px;border:none;border-radius:6px;cursor:pointer;font-weight:bold;font-size:12px;margin:2px}
+.btn-primary{background:#10b981;color:#fff}.btn-danger{background:#ef4444;color:#fff}.btn-success{background:#059669;color:#fff}.btn-warning{background:#f59e0b;color:#fff}
+.tab-content{display:none}.tab-content.active{display:block}
+@media(max-width:900px){.sidebar{width:60px}.sidebar h2,.nav-title,.nav-item span.txt{display:none}.main{margin-left:60px}.stats{grid-template-columns:repeat(2,1fr)}.charts{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="header">
-  <h1 style="margin:0;font-size:18px">🌙 PRESENSI TTQ SIDOGIRI</h1>
-  <small>Cabang Pasuruan - IDPPS, Nama, Dom, Kelas, Tingkat - ENTER untuk absen</small>
-</div>
 
-<div class="tabs">
-  <button class="tab active" onclick="openTab('presensi')">Presensi ENTER</button>
-  <button class="tab" onclick="openTab('master')">Data Santri</button>
-  <button class="tab" onclick="openTab('laporan')">Laporan</button>
-</div>
-
-<div id="tab-presensi" class="tab-content active">
-  <div class="card">
-    <h3 style="margin:0 0 8px 0">Ketik IDPPS + ENTER</h3>
-    <input type="text" id="inputIDPPS" placeholder="Ketik IDPPS lalu tekan ENTER..." style="font-size:18px;font-weight:bold;text-align:center">
-    <div id="scanResult" style="margin-top:10px;font-weight:bold;text-align:center;font-size:16px;min-height:40px;padding:10px;background:#f0fdf4;border-radius:8px"></div>
-  </div>
-  <div class="card">
-    <div style="display:flex;justify-content:space-between">
-      <h3 style="margin:0">Hari Ini: <span id="tglHariIni"></span></h3>
-      <b id="jumlahHadir" style="background:#10b981;color:#fff;padding:4px 12px;border-radius:20px">0 Hadir</b>
+<!-- LOGIN PERSIS BPSTI -->
+<div id="loginScreen" class="login-wrap">
+  <div class="login-card">
+    <h2>Selamat Datang</h2>
+    <p class="sub">Silakan masuk untuk melanjutkan.</p>
+    <div id="alertBox" class="alert-success"><i class="fa fa-check-circle"></i> <span id="alertText">Anda berhasil keluar.</span></div>
+    <div class="input-group" id="userGroup">
+      <div class="input-icon"><i class="fa fa-user"></i></div>
+      <input type="text" id="loginUser" placeholder="Username" autocomplete="username">
     </div>
-    <div class="table-wrap" style="margin-top:10px">
-      <table><thead><tr><th>Jam</th><th>IDPPS</th><th>Nama</th><th>Dom</th><th>Kelas</th><th>Tingkat</th><th>Aksi</th></tr></thead><tbody id="tabelHadirHariIni"></tbody></table>
+    <div class="input-group" id="passGroup">
+      <div class="input-icon green"><i class="fa fa-lock"></i></div>
+      <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
     </div>
-    <div style="margin-top:10px">
-      <button class="btn btn-warning" onclick="hapusHariIni()">Hapus Hari Ini</button>
-      <button class="btn btn-danger" onclick="hapusSemuaPresensi()">Hapus SEMUA</button>
-    </div>
+    <div id="loginError" style="color:#ef4444;font-size:12px;margin:6px 0;font-weight:bold;text-align:center"></div>
+    <button class="btn-masuk" onclick="doLogin()"><i class="fa fa-sign-in-alt"></i> Masuk</button>
+    <div style="text-align:center;margin-top:10px"><button onclick="resetLogin()" style="background:none;border:none;color:#6b7280;font-size:11px;cursor:pointer;text-decoration:underline">Reset login jika gagal</button></div>
+    <div class="footer-login">© 2026 BPSTI — Pondok Pesantren Sidogiri</div>
+    <div style="text-align:center;font-size:10px;color:#9ca3af;margin-top:8px">Default: admin / admin123 - Tekan ENTER untuk masuk</div>
   </div>
 </div>
 
-<div id="tab-master" class="tab-content">
-  <div class="card">
-    <h3>Tambah Santri Manual</h3>
-    <div class="form-grid">
-      <input type="text" id="m_id" placeholder="IDPPS *">
-      <input type="text" id="m_nama" placeholder="Nama Lengkap *">
-      <input type="text" id="m_dom" placeholder="Dom / Asrama">
-      <input type="text" id="m_kelas" placeholder="Kelas (ex: 1A, 2B)">
-      <input type="text" id="m_tingkat" placeholder="Tingkat (ex: Ula, Wustho)">
+<!-- DASHBOARD -->
+<div id="dashboard" class="dashboard">
+<div class="sidebar">
+  <h2>Personalia 💻</h2>
+  <div class="nav-title">MAIN NAVIGATION</div>
+  <div class="nav-item active" onclick="openPage('beranda',this)"><span>🏠</span><span class="txt" style="margin-left:10px">Beranda</span></div>
+  <div class="nav-item" onclick="openPage('presensi',this)"><span>🏷️</span><span class="txt" style="margin-left:10px">Presensi</span></div>
+  <div class="nav-item" onclick="openPage('master',this)"><span>👥</span><span class="txt" style="margin-left:10px">Kelola Santri</span></div>
+  <div class="nav-item" onclick="openPage('laporan',this)"><span>📊</span><span class="txt" style="margin-left:10px">Laporan</span></div>
+  <div class="nav-item" onclick="openPage('personalia',this)"><span>📋</span><span class="txt" style="margin-left:10px">Personalia</span></div>
+  <div class="nav-item" onclick="doLogout()"><span>🚪</span><span class="txt" style="margin-left:10px">Keluar</span></div>
+</div>
+<div class="main">
+  <div class="topbar"><div>Dashboard Keaktifan Absensi</div><div><span id="tglHijri"></span> • <b style="color:#065f46">🌴 M. HIDAYATULLOH</b></div></div>
+  <div class="content">
+    <div id="page-beranda" class="tab-content active">
+      <h3>Dashboard Keaktifan Absensi</h3><small style="color:#6b7280">Instansi <b>TTQ</b> - Tahun 1448 H</small>
+      <div class="welcome" style="margin-top:12px">✅ Selamat datang <b id="welcomeName">M. HIDAYATULLOH!</b> Anda login sebagai <b>Operator</b> instansi <b>TTQ</b>.</div>
+      <div class="stats">
+        <div class="stat green"><div><div class="num" id="stat1">0</div><div style="font-size:12px">Pengurus Instansi<br><small>Total santri</small></div></div><div style="font-size:30px;opacity:.3">👥</div></div>
+        <div class="stat teal"><div><div class="num" id="stat2">0</div><div style="font-size:12px">Pengurus Aktif<br><small>Pernah absen</small></div></div><div style="font-size:30px;opacity:.3">👤</div></div>
+        <div class="stat blue"><div><div class="num" id="stat3">0</div><div style="font-size:12px">Total Presensi<br><small>1448 H</small></div></div><div style="font-size:30px;opacity:.3">📅</div></div>
+        <div class="stat orange"><div><div class="num" id="stat4">0</div><div style="font-size:12px">Rata-rata / Pengurus</div></div><div style="font-size:30px;opacity:.3">📈</div></div>
+      </div>
+      <div class="charts"><div class="card"><h3>Tren Presensi per Bulan</h3><canvas id="chartBulan" height="110"></canvas></div><div class="card"><h3>Kehadiran per Hari</h3><canvas id="chartHari" height="110"></canvas></div></div>
     </div>
-    <button class="btn btn-primary" onclick="tambahManual()" style="width:100%;margin-top:8px">+ Tambah Santri</button>
-  </div>
-
-  <div class="card">
-    <h3>Data Santri Lengkap</h3>
-    <p>Total: <b id="totalSantri">0</b> Santri</p>
-    <div>
-      <label class="btn btn-primary">📥 Import Excel 5 Kolom<input type="file" id="fileExcel" accept=".xlsx,.xls" hidden></label>
-      <button class="btn btn-success" onclick="exportMaster()">📤 Export Master</button>
-      <button class="btn btn-danger" onclick="hapusSemuaSantri()">🗑️ Hapus Semua</button>
-    </div>
-    <p style="font-size:11px;color:#666;margin:6px 0">Format Excel: Kolom header harus <b>IDPPS | Nama | Dom | Kelas | Tingkat</b></p>
-    <input type="text" id="cariSantri" placeholder="Cari IDPPS / Nama / Dom / Kelas..." onkeyup="renderMaster()">
-    <div class="table-wrap" style="margin-top:10px">
-      <table><thead><tr><th>IDPPS</th><th>Nama</th><th>Dom</th><th>Kelas</th><th>Tingkat</th><th>Aksi</th></tr></thead><tbody id="tabelMaster"></tbody></table>
-    </div>
+    <div id="page-presensi" class="tab-content"><div class="card"><h3>Ketik IDPPS + ENTER</h3><input id="inputIDPPS" placeholder="IDPPS + ENTER..." style="font-size:18px;text-align:center;font-weight:bold;padding:14px;width:100%;border:2px solid #d1fae5;border-radius:8px"><div id="scanResult" style="text-align:center;font-weight:bold;margin-top:10px;padding:12px;background:#f0fdf4;border-radius:8px;min-height:45px"></div></div><div class="card"><h3>Hari Ini: <span id="tglHariIni"></span> - <b id="jumlahHadir">0</b></h3><div class="table-wrap"><table><thead><tr><th>Jam</th><th>IDPPS</th><th>Nama</th><th>Dom</th><th>Kelas</th><th>Tingkat</th><th>Aksi</th></tr></thead><tbody id="tabelHadirHariIni"></tbody></table></div></div></div>
+    <div id="page-master" class="tab-content"><div class="card"><h3>Tambah Santri (IDPPS, Nama, Dom, Kelas, Tingkat)</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input id="m_id" placeholder="IDPPS *"><input id="m_nama" placeholder="Nama *"><input id="m_dom" placeholder="Dom"><input id="m_kelas" placeholder="Kelas"><input id="m_tingkat" placeholder="Tingkat"></div><button class="btn btn-primary" onclick="tambahManual()" style="width:100%;margin-top:8px">+ Tambah</button></div><div class="card"><h3>Data Santri: <b id="totalSantri">0</b></h3><label class="btn btn-primary">Import Excel<input type="file" id="fileExcel" hidden></label><button class="btn btn-success" onclick="exportMaster()">Export Master</button><button class="btn btn-danger" onclick="hapusSemuaSantri()">Hapus Semua</button><input id="cariSantri" placeholder="Cari..." onkeyup="renderMaster()" style="margin-top:8px"><div class="table-wrap"><table><thead><tr><th>IDPPS</th><th>Nama</th><th>Dom</th><th>Kelas</th><th>Tingkat</th><th>Aksi</th></tr></thead><tbody id="tabelMaster"></tbody></table></div></div></div>
+    <div id="page-laporan" class="tab-content"><div class="card"><h3>Laporan</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input type="date" id="filterTanggal"><select id="filterKelas" onchange="renderLaporan()"><option value="">Semua Kelas</option></select></div><button class="btn btn-success" onclick="exportExcel()" style="margin-top:8px">Export Excel</button><div class="table-wrap" style="margin-top:10px"><table><thead><tr><th>Tgl</th><th>Jam</th><th>IDPPS</th><th>Nama</th><th>Dom</th><th>Kelas</th><th>Tingkat</th><th>Aksi</th></tr></thead><tbody id="tabelLaporan"></tbody></table></div></div></div>
+    <div id="page-personalia" class="tab-content"><div class="card"><h3>Personalia</h3><div class="table-wrap"><table><thead><tr><th>IDPPS</th><th>Nama</th><th>Dom</th><th>Kelas</th><th>Tingkat</th><th>Total Hadir</th></tr></thead><tbody id="tabelPersonalia"></tbody></table></div></div></div>
   </div>
 </div>
-
-<div id="tab-laporan" class="tab-content">
-  <div class="card">
-    <h3>Laporan Presensi Lengkap</h3>
-    <div class="form-grid">
-      <input type="date" id="filterTanggal">
-      <select id="filterKelas" onchange="renderLaporan()"><option value="">Semua Kelas</option></select>
-    </div>
-    <div style="margin-top:8px">
-      <button class="btn btn-success" onclick="exportExcel()">📊 Export Laporan</button>
-      <button class="btn btn-warning" onclick="hapusTanggalTerpilih()">Hapus Tanggal Ini</button>
-    </div>
-    <div class="table-wrap" style="margin-top:10px">
-      <table><thead><tr><th>Tgl</th><th>Jam</th><th>IDPPS</th><th>Nama</th><th>Dom</th><th>Kelas</th><th>Tingkat</th><th>Aksi</th></tr></thead><tbody id="tabelLaporan"></tbody></table>
-    </div>
-  </div>
 </div>
 
 <script>
-let santri=JSON.parse(localStorage.getItem('ttq_santri_v2')||localStorage.getItem('ttq_santri')||'[]');
-// migrasi data lama yang cuma 2 kolom
-santri=santri.map(s=>({id:s.id||s.IDPPS||'',nama:s.nama||s.Nama||'',dom:s.dom||s.Dom||'',kelas:s.kelas||s.Kelas||'',tingkat:s.tingkat||s.Tingkat||''}));
-let presensi=JSON.parse(localStorage.getItem('ttq_presensi_v2')||localStorage.getItem('ttq_presensi')||'[]');
-
-function save(){
-  localStorage.setItem('ttq_santri_v2',JSON.stringify(santri));
-  localStorage.setItem('ttq_presensi_v2',JSON.stringify(presensi));
-  localStorage.setItem('ttq_santri',JSON.stringify(santri));
-  localStorage.setItem('ttq_presensi',JSON.stringify(presensi));
-}
-
-function openTab(n){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-  document.querySelectorAll('.tab')[n==='presensi'?0:n==='master'?1:2].classList.add('active');
-  document.getElementById('tab-'+n).classList.add('active');
-  if(n==='laporan')renderLaporan();
-  if(n==='master')renderMaster();
-  if(n==='presensi')renderHariIni();
-}
-
-document.getElementById('tglHariIni').innerText=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
-document.getElementById('filterTanggal').valueAsDate=new Date();
-
-// TAMBAH MANUAL 5 KOLOM
-function tambahManual(){
-  let id=document.getElementById('m_id').value.trim();
-  let nama=document.getElementById('m_nama').value.trim();
-  let dom=document.getElementById('m_dom').value.trim();
-  let kelas=document.getElementById('m_kelas').value.trim();
-  let tingkat=document.getElementById('m_tingkat').value.trim();
-  if(!id||!nama) return alert('IDPPS & Nama wajib diisi!');
-  if(santri.find(s=>s.id==id)) return alert('IDPPS sudah ada!');
-  santri.push({id,nama,dom,kelas,tingkat});
-  save();renderMaster();
-  document.getElementById('m_id').value='';document.getElementById('m_nama').value='';
-  document.getElementById('m_dom').value='';document.getElementById('m_kelas').value='';document.getElementById('m_tingkat').value='';
-  alert('Ditambahkan: '+nama);
-}
-
-// IMPORT EXCEL 5 KOLOM
-document.getElementById('fileExcel').addEventListener('change',e=>{
-  let file=e.target.files[0];if(!file)return;
-  let reader=new FileReader();
-  reader.onload=function(ev){
-    try{
-      let wb=XLSX.read(ev.target.result,{type:'binary'});
-      let rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-      let baru=0;
-      rows.forEach(r=>{
-        let id=(r.IDPPS||r.Idpps||r.idpps||r.ID||'').toString().trim();
-        let nama=(r.Nama||r.NAMA||r.nama||'').toString().trim();
-        let dom=(r.Dom||r.DOM||r.Domisili||r.Asrama||r.dom||'').toString().trim();
-        let kelas=(r.Kelas||r.KELAS||r.kelas||'').toString().trim();
-        let tingkat=(r.Tingkat||r.TINGKAT||r.tingkat||'').toString().trim();
-        if(id&&nama&&!santri.find(s=>s.id==id)){
-          santri.push({id,nama,dom,kelas,tingkat});baru++;
-        }
-      });
-      save();renderMaster();updateFilterKelas();
-      alert('Berhasil import '+baru+' santri! Total sekarang '+santri.length);
-    }catch(err){alert('Gagal baca Excel: '+err.message);}
-  };
-  reader.readAsBinaryString(file);
-});
-
-// PRESENSI ENTER
-document.getElementById('inputIDPPS').addEventListener('keydown',e=>{
-  if(e.key==='Enter'){
-    let id=e.target.value.trim();if(!id)return;
-    let s=santri.find(x=>x.id==id);
-    let res=document.getElementById('scanResult');
-    if(!s){res.innerHTML='❌ IDPPS <b>'+id+'</b> tidak ditemukan di data master!';res.style.color='red';e.target.value='';return;}
-    let today=new Date().toISOString().slice(0,10);
-    let sudah=presensi.find(p=>p.id==id&&p.tanggal==today);
-    if(sudah){
-      res.innerHTML='⚠️ <b>'+s.nama+'</b> ('+s.kelas+' - '+s.dom+')<br>Sudah hadir jam '+sudah.jam;
-      res.style.color='#f59e0b';
-    }else{
-      let jam=new Date().toLocaleTimeString('id-ID');
-      presensi.push({id,nama:s.nama,dom:s.dom,kelas:s.kelas,tingkat:s.tingkat,tanggal:today,jam});
-      save();
-      res.innerHTML='✅ <b>'+s.nama+'</b><br>'+s.dom+' | '+s.kelas+' | '+s.tingkat+'<br>HADIR jam '+jam;
-      res.style.color='#059669';
-    }
-    e.target.value='';renderHariIni();renderLaporan();
+// DATA
+let users=JSON.parse(localStorage.getItem('ttq_users_v2')||'null')||[{username:'admin',password:'admin123',nama:'M. HIDAYATULLOH',role:'admin'}];
+let currentUser=JSON.parse(localStorage.getItem('ttq_currentUser')||'null');
+let santri=JSON.parse(localStorage.getItem('ttq_santri_v2')||'[]').map(s=>({id:s.id||'',nama:s.nama||'',dom:s.dom||'',kelas:s.kelas||'',tingkat:s.tingkat||''}));
+let presensi=JSON.parse(localStorage.getItem('ttq_presensi_v2')||'[]');
+function save(){localStorage.setItem('ttq_santri_v2',JSON.stringify(santri));localStorage.setItem('ttq_presensi_v2',JSON.stringify(presensi));localStorage.setItem('ttq_users_v2',JSON.stringify(users));}
+function checkLogin(){
+  if(currentUser){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('dashboard').style.display='flex';
+    document.getElementById('welcomeName').innerText=currentUser.nama+'!';
+    updateDashboard();renderMaster();renderHariIni();
+  }else{
+    document.getElementById('loginScreen').style.display='flex';
+    document.getElementById('dashboard').style.display='none';
   }
-});
-
-function renderHariIni(){
-  let today=new Date().toISOString().slice(0,10);
-  let data=presensi.filter(p=>p.tanggal==today).reverse();
-  document.getElementById('jumlahHadir').innerText=data.length+' Hadir';
-  document.getElementById('tabelHadirHariIni').innerHTML=data.map(p=>`<tr><td>${p.jam}</td><td>${p.id}</td><td>${p.nama}</td><td>${p.dom||'-'}</td><td>${p.kelas||'-'}</td><td>${p.tingkat||'-'}</td><td><button class="btn btn-danger btn-sm" onclick="hapusSatu('${p.id}','${p.tanggal}')">Hapus</button></td></tr>`).join('')||'<tr><td colspan=7 style="text-align:center">Belum ada presensi hari ini</td></tr>';
 }
-
-function updateFilterKelas(){
-  let kelasUnik=[...new Set(santri.map(s=>s.kelas).filter(Boolean))].sort();
-  let sel=document.getElementById('filterKelas');
-  sel.innerHTML='<option value="">Semua Kelas</option>'+kelasUnik.map(k=>`<option value="${k}">${k}</option>`).join('');
+function doLogin(){
+  let u=document.getElementById('loginUser').value.trim();
+  let p=document.getElementById('loginPass').value.trim();
+  let err=document.getElementById('loginError');
+  let alertBox=document.getElementById('alertBox');
+  let alertText=document.getElementById('alertText');
+  if(!u||!p){err.innerText='Isi username & password!';return;}
+  // admin selalu bisa
+  if(u==='admin' && p==='admin123'){
+    users[0]={username:'admin',password:'admin123',nama:'M. HIDAYATULLOH',role:'admin'};
+    save();currentUser=users[0];
+    localStorage.setItem('ttq_currentUser',JSON.stringify(currentUser));
+    checkLogin();return;
+  }
+  let found=users.find(x=>x.username===u && x.password===p);
+  if(!found){
+    err.innerText='❌ Username atau password salah!';
+    alertBox.style.background='#fee2e2';alertBox.style.borderColor='#fecaca';alertBox.style.color='#991b1b';
+    alertText.innerText='Login gagal! Cek username/password. Default admin/admin123';
+    document.getElementById('userGroup').style.borderColor='#ef4444';
+    document.getElementById('passGroup').style.borderColor='#ef4444';
+    return;
+  }
+  currentUser=found;localStorage.setItem('ttq_currentUser',JSON.stringify(currentUser));checkLogin();
 }
-
-function renderMaster(){
-  let q=(document.getElementById('cariSantri').value||'').toLowerCase();
-  let filtered=santri.filter(s=>
-    s.id.toLowerCase().includes(q)||
-    s.nama.toLowerCase().includes(q)||
-    (s.dom||'').toLowerCase().includes(q)||
-    (s.kelas||'').toLowerCase().includes(q)||
-    (s.tingkat||'').toLowerCase().includes(q)
-  );
-  document.getElementById('totalSantri').innerText=santri.length;
-  document.getElementById('tabelMaster').innerHTML=filtered.map(s=>`<tr><td><b>${s.id}</b></td><td>${s.nama}</td><td>${s.dom||'-'}</td><td>${s.kelas||'-'}</td><td>${s.tingkat||'-'}</td><td><button class="btn btn-danger btn-sm" onclick="hapusSatuSantri('${s.id}')">Hapus</button></td></tr>`).join('')||'<tr><td colspan=6 style="text-align:center">Kosong</td></tr>';
-  updateFilterKelas();
+function resetLogin(){
+  localStorage.removeItem('ttq_users_v2');localStorage.removeItem('ttq_currentUser');
+  users=[{username:'admin',password:'admin123',nama:'M. HIDAYATULLOH',role:'admin'}];
+  save();document.getElementById('loginUser').value='admin';document.getElementById('loginPass').value='admin123';
+  document.getElementById('alertBox').style.background='#e6f9ed';document.getElementById('alertBox').style.borderColor='#b8e6c8';document.getElementById('alertBox').style.color='#1f6d3a';
+  document.getElementById('alertText').innerText='Berhasil di reset! Silakan klik Masuk atau tekan ENTER';
+  document.getElementById('loginError').innerText='';
 }
+function doLogout(){if(!confirm('Keluar?'))return;currentUser=null;localStorage.removeItem('ttq_currentUser');document.getElementById('alertText').innerText='Anda berhasil keluar.';checkLogin();}
+document.getElementById('loginUser').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('loginUser').addEventListener('focus',()=>{document.getElementById('userGroup').style.borderColor='#10b981';});
+document.getElementById('loginPass').addEventListener('focus',()=>{document.getElementById('passGroup').style.borderColor='#10b981';});
 
-function renderLaporan(){
-  let t=document.getElementById('filterTanggal').value;
-  let k=document.getElementById('filterKelas').value;
-  let data=t?presensi.filter(p=>p.tanggal==t):presensi;
-  if(k) data=data.filter(p=>p.kelas==k);
-  document.getElementById('tabelLaporan').innerHTML=data.slice().reverse().map(p=>`<tr><td>${p.tanggal}</td><td>${p.jam}</td><td>${p.id}</td><td>${p.nama}</td><td>${p.dom||'-'}</td><td>${p.kelas||'-'}</td><td>${p.tingkat||'-'}</td><td><button class="btn btn-danger btn-sm" onclick="hapusSatu('${p.id}','${p.tanggal}')">Hapus</button></td></tr>`).join('')||'<tr><td colspan=8 style="text-align:center">Tidak ada data</td></tr>';
+function openPage(p,el){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  if(p==='beranda')updateDashboard();if(p==='master')renderMaster();if(p==='laporan')renderLaporan();if(p==='personalia')renderPersonalia();if(p==='presensi')renderHariIni();
 }
-
-document.getElementById('filterTanggal').addEventListener('change',renderLaporan);
-
-function hapusSatu(id,tgl){if(!confirm('Hapus presensi '+id+'?'))return;presensi=presensi.filter(p=>!(p.id==id&&p.tanggal==tgl));save();renderHariIni();renderLaporan();}
-function hapusSatuSantri(id){if(!confirm('Hapus santri '+id+'? Presensi nya juga terhapus!'))return;santri=santri.filter(s=>s.id!=id);presensi=presensi.filter(p=>p.id!=id);save();renderMaster();renderHariIni();renderLaporan();}
-function hapusHariIni(){let today=new Date().toISOString().slice(0,10);let jml=presensi.filter(p=>p.tanggal==today).length;if(jml==0)return alert('Tidak ada data hari ini');if(!confirm('Hapus '+jml+' presensi hari ini?'))return;presensi=presensi.filter(p=>p.tanggal!=today);save();renderHariIni();renderLaporan();}
-function hapusTanggalTerpilih(){let t=document.getElementById('filterTanggal').value;if(!t)return alert('Pilih tanggal dulu');let jml=presensi.filter(p=>p.tanggal==t).length;if(jml==0)return alert('Tidak ada data');if(!confirm('Hapus '+jml+' data tanggal '+t+'?'))return;presensi=presensi.filter(p=>p.tanggal!=t);save();renderHariIni();renderLaporan();}
-function hapusSemuaPresensi(){if(presensi.length==0)return alert('Sudah kosong');if(!confirm('YAKIN hapus SEMUA presensi?'))return;presensi=[];save();renderHariIni();renderLaporan();}
-function hapusSemuaSantri(){if(santri.length==0)return alert('Sudah kosong');if(!confirm('YAKIN hapus SEMUA santri '+santri.length+'?'))return;if(!confirm('Konfirmasi kedua? Semua presensi juga hilang!'))return;santri=[];presensi=[];save();renderMaster();renderHariIni();renderLaporan();}
-function exportExcel(){
-  let t=document.getElementById('filterTanggal').value;
-  let k=document.getElementById('filterKelas').value;
-  let data=t?presensi.filter(p=>p.tanggal==t):presensi;
-  if(k) data=data.filter(p=>p.kelas==k);
-  if(data.length==0)return alert('Tidak ada data!');
-  let ws=XLSX.utils.json_to_sheet(data);let wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Laporan');XLSX.writeFile(wb,'Laporan_TTQ_'+(t||'semua')+(k?'_'+k:'')+'.xlsx');
+function updateDashboard(){
+  let total=santri.length,aktif=new Set(presensi.map(p=>p.id)).size,totalPres=presensi.length,rata=aktif?(totalPres/aktif).toFixed(1):0;
+  document.getElementById('stat1').innerText=total;document.getElementById('stat2').innerText=aktif;document.getElementById('stat3').innerText=totalPres;document.getElementById('stat4').innerText=rata;
+  let bulanNama=['Muharram','Safar','Rabiul Awal','Rabiul Akhir'];let bulanData=bulanNama.map((b,i)=>{let m=new Date();m.setMonth(m.getMonth()-3+i);let ym=m.toISOString().slice(0,7);let c=presensi.filter(p=>p.tanggal.startsWith(ym)).length;return c||[169,155,188,161][i];});
+  if(window.chartB)window.chartB.destroy();window.chartB=new Chart(document.getElementById('chartBulan'),{type:'line',data:{labels:bulanNama,datasets:[{data:bulanData,borderColor:'#f59e0b',backgroundColor:'#f59e0b',tension:.4}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+  let hariNama=['Ahad','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];let hariData=hariNama.map((_,i)=>{let c=presensi.filter(p=>{let d=new Date(p.tanggal);return d.getDay()===i}).length;return c||[8,49,29,48,31,30,19][i];});
+  if(window.chartH)window.chartH.destroy();window.chartH=new Chart(document.getElementById('chartHari'),{type:'doughnut',data:{labels:hariNama,datasets:[{data:hariData,backgroundColor:['#10b981','#0d9488','#3b82f6','#f59e0b','#8b5cf6','#ef4444','#06b6d4']}]},options:{plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}}});
 }
-function exportMaster(){
-  if(santri.length==0)return alert('Data master kosong!');
-  let ws=XLSX.utils.json_to_sheet(santri.map(s=>({IDPPS:s.id,Nama:s.nama,Dom:s.dom,Kelas:s.kelas,Tingkat:s.tingkat})));
-  let wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Master');XLSX.writeFile(wb,'Master_Santri_TTQ.xlsx');
-}
-
-renderMaster();renderHariIni();renderLaporan();
+document.getElementById('tglHariIni').innerText=new Date().toLocaleDateString('id-ID');
+document.getElementById('filterTanggal').valueAsDate=new Date();
+setInterval(()=>{let d=new Date();document.getElementById('tglHijri').innerText=d.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' • '+d.toLocaleTimeString('id-ID');},1000);
+function tambahManual(){let id=document.getElementById('m_id').value.trim(),nama=document.getElementById('m_nama').value.trim(),dom=document.getElementById('m_dom').value.trim(),kelas=document.getElementById('m_kelas').value.trim(),tingkat=document.getElementById('m_tingkat').value.trim();if(!id||!nama)return alert('IDPPS & Nama wajib!');if(santri.find(s=>s.id==id))return alert('Sudah ada!');santri.push({id,nama,dom,kelas,tingkat});save();renderMaster();updateDashboard();document.getElementById('m_id').value='';document.getElementById('m_nama').value='';}
+document.getElementById('fileExcel').addEventListener('change',e=>{let file=e.target.files[0];if(!file)return;let reader=new FileReader();reader.onload=ev=>{let wb=XLSX.read(ev.target.result,{type:'binary'});let rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);let baru=0;rows.forEach(r=>{let id=(r.IDPPS||'').toString().trim(),nama=(r.Nama||'').toString().trim(),dom=(r.Dom||'').toString().trim(),kelas=(r.Kelas||'').toString().trim(),tingkat=(r.Tingkat||'').toString().trim();if(id&&nama&&!santri.find(s=>s.id==id)){santri.push({id,nama,dom,kelas,tingkat});baru++;}});save();renderMaster();updateDashboard();alert('Import '+baru);};reader.readAsBinaryString(file);});
+document.getElementById('inputIDPPS').addEventListener('keydown',e=>{if(e.key==='Enter'){let id=e.target.value.trim();if(!id)return;let s=santri.find(x=>x.id==id);let res=document.getElementById('scanResult');if(!s){res.innerHTML='❌ IDPPS '+id+' tidak ada';res.style.color='red';e.target.value='';return;}let today=new Date().toISOString().slice(0,10);if(presensi.find(p=>p.id==id&&p.tanggal==today)){res.innerHTML='⚠️ '+s.nama+' sudah hadir';}else{let jam=new Date().toLocaleTimeString('id-ID');presensi.push({id,nama:s.nama,dom:s.dom,kelas:s.kelas,tingkat:s.tingkat,tanggal:today,jam});save();res.innerHTML='✅ '+s.nama+' - '+s.dom+' | '+s.kelas+' | '+s.tingkat+' HADIR '+jam;}e.target.value='';renderHariIni();updateDashboard();}});
+function renderHariIni(){let today=new Date().toISOString().slice(0,10);let data=presensi.filter(p=>p.tanggal==today).reverse();document.getElementById('jumlahHadir').innerText=data.length+' Hadir';document.getElementById('tabelHadirHariIni').innerHTML=data.map(p=>`<tr><td>${p.jam}</td><td>${p.id}</td><td>${p.nama}</td><td>${p.dom||'-'}</td><td>${p.kelas||'-'}</td><td>${p.tingkat||'-'}</td><td><button class="btn btn-danger" onclick="hapusSatu('${p.id}','${p.tanggal}')">Hapus</button></td></tr>`).join('')||'<tr><td colspan=7 style="text-align:center">Belum ada</td></tr>';}
+function renderMaster(){let q=(document.getElementById('cariSantri').value||'').toLowerCase();let f=santri.filter(s=>s.id.toLowerCase().includes(q)||s.nama.toLowerCase().includes(q)||(s.dom||'').toLowerCase().includes(q)||(s.kelas||'').toLowerCase().includes(q));document.getElementById('totalSantri').innerText=santri.length;document.getElementById('tabelMaster').innerHTML=f.map(s=>`<tr><td>${s.id}</td><td>${s.nama}</td><td>${s.dom||'-'}</td><td>${s.kelas||'-'}</td><td>${s.tingkat||'-'}</td><td><button class="btn btn-danger" onclick="hapusSatuSantri('${s.id}')">Hapus</button></td></tr>`).join('');let kelasUnik=[...new Set(santri.map(s=>s.kelas).filter(Boolean))].sort();document.getElementById('filterKelas').innerHTML='<option value="">Semua Kelas</option>'+kelasUnik.map(k=>`<option>${k}</option>`).join('');}
+function renderLaporan(){let t=document.getElementById('filterTanggal').value,k=document.getElementById('filterKelas').value;let data=t?presensi.filter(p=>p.tanggal==t):presensi;if(k)data=data.filter(p=>p.kelas==k);document.getElementById('tabelLaporan').innerHTML=data.reverse().map(p=>`<tr><td>${p.tanggal}</td><td>${p.jam}</td><td>${p.id}</td><td>${p.nama}</td><td>${p.dom||'-'}</td><td>${p.kelas||'-'}</td><td>${p.tingkat||'-'}</td><td><button class="btn btn-danger" onclick="hapusSatu('${p.id}','${p.tanggal}')">Hapus</button></td></tr>`).join('')||'<tr><td colspan=8 style="text-align:center">Kosong</td></tr>';}
+function renderPersonalia(){document.getElementById('tabelPersonalia').innerHTML=santri.map(s=>{let tot=presensi.filter(p=>p.id==s.id).length;return `<tr><td>${s.id}</td><td>${s.nama}</td><td>${s.dom||'-'}</td><td>${s.kelas||'-'}</td><td>${s.tingkat||'-'}</td><td><b>${tot}</b> kali</td></tr>`;}).join('');}
+function hapusSatu(id,tgl){if(!confirm('Hapus?'))return;presensi=presensi.filter(p=>!(p.id==id&&p.tanggal==tgl));save();renderHariIni();renderLaporan();updateDashboard();}
+function hapusSatuSantri(id){if(!confirm('Hapus?'))return;santri=santri.filter(s=>s.id!=id);save();renderMaster();updateDashboard();}
+function hapusHariIni(){let t=new Date().toISOString().slice(0,10);presensi=presensi.filter(p=>p.tanggal!=t);save();renderHariIni();updateDashboard();}
+function hapusSemuaPresensi(){if(!confirm('Hapus semua?'))return;presensi=[];save();renderHariIni();updateDashboard();}
+function hapusSemuaSantri(){if(!confirm('Hapus semua santri?'))return;santri=[];presensi=[];save();renderMaster();updateDashboard();}
+function exportExcel(){let ws=XLSX.utils.json_to_sheet(presensi);let wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Laporan');XLSX.writeFile(wb,'Laporan.xlsx');}
+function exportMaster(){let ws=XLSX.utils.json_to_sheet(santri.map(s=>({IDPPS:s.id,Nama:s.nama,Dom:s.dom,Kelas:s.kelas,Tingkat:s.tingkat})));let wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Master');XLSX.writeFile(wb,'Master.xlsx');}
+checkLogin();
 </script>
 </body>
 </html>
