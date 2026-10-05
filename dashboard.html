@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scan / Input ID PPS - Mode Gelap</title>
+  <title>Absensi Digital Pondok Pesantren Sidogiri - Dark Mode</title>
   <style>
     * {
       box-sizing: border-box;
@@ -12,31 +12,112 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    /* Background Utama Tema Dark Dashboard */
     body {
       background-color: #0b1120;
-      color: #e2e8f0;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
       padding: 20px;
     }
 
-    /* Card Utama Dua Kolom */
+    /* ==========================================
+       1. TOMBOL GERIGI & POP-UP MENU (KIRI)
+       ========================================== */
+    .setting-wrapper {
+      position: fixed;
+      top: 30px;
+      left: 0;
+      z-index: 999;
+    }
+
+    .btn-gear {
+      background-color: #0284c7;
+      color: white;
+      border: none;
+      padding: 10px 18px 10px 14px;
+      border-top-right-radius: 12px;
+      border-bottom-right-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      transition: background-color 0.2s;
+    }
+
+    .btn-gear:hover {
+      background-color: #0369a1;
+    }
+
+    /* Pop-up Menu Dropdown Mode Gelap */
+    .popup-menu {
+      display: none;
+      position: absolute;
+      top: 50px;
+      left: 15px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      padding: 12px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 170px;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .popup-menu.show {
+      display: flex;
+    }
+
+    .btn-menu-kembali {
+      background-color: #dc2626;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+    }
+
+    .btn-menu-sakit {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+    }
+
+    /* ==========================================
+       2. KARTU UTAMA (MAIN CONTAINER DARK MODE)
+       ========================================== */
     .main-card {
-      background-color: #111827;
+      background: #111827;
       border: 1px solid #1e293b;
-      border-radius: 20px;
+      border-radius: 24px;
       width: 100%;
       max-width: 1050px;
       display: flex;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
       overflow: hidden;
       min-height: 420px;
     }
 
-    /* Panel Kiri - Input ID & Status */
+    /* KOLOM KIRI */
     .left-panel {
       flex: 1;
       padding: 40px;
@@ -47,11 +128,11 @@
       background-color: #111827;
     }
 
-    /* Status Bar Indikator */
+    /* Status Bar */
     .status-bar {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       font-size: 12px;
       font-weight: 700;
       margin-bottom: 25px;
@@ -62,7 +143,7 @@
       height: 8px;
       border-radius: 50%;
       display: inline-block;
-      margin-right: 5px;
+      margin-right: 4px;
     }
 
     .status-online { color: #10b981; }
@@ -77,7 +158,7 @@
     .status-update { color: #38bdf8; }
     .status-update .dot { background-color: #38bdf8; }
 
-    /* Judul Aplikasi */
+    /* Judul Mode Gelap */
     .title-main {
       color: #00d2ff;
       font-size: 28px;
@@ -93,7 +174,7 @@
       margin-bottom: 30px;
     }
 
-    /* Input Field ID PPS Mode Gelap */
+    /* Input Field ID Mode Gelap */
     .input-box {
       width: 100%;
       padding: 14px 18px;
@@ -103,7 +184,7 @@
       font-size: 14px;
       outline: none;
       color: #f8fafc;
-      transition: all 0.2s ease;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .input-box::placeholder {
@@ -112,7 +193,7 @@
 
     .input-box:focus {
       border-color: #00d2ff;
-      box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+      box-shadow: 0 0 10px rgba(0, 210, 255, 0.25);
     }
 
     .footer-text {
@@ -122,7 +203,7 @@
       margin-top: 30px;
     }
 
-    /* Panel Kanan - Profil */
+    /* KOLOM KANAN (PROFIL DARK MODE) */
     .right-panel {
       flex: 1;
       padding: 40px;
@@ -141,7 +222,7 @@
     }
 
     .profile-title {
-      font-size: 30px;
+      font-size: 32px;
       font-weight: 800;
       color: #f8fafc;
     }
@@ -152,13 +233,13 @@
       color: #10b981;
     }
 
-    /* Ornamen Pojok Kanan Atas */
+    /* Ornamen Grafis */
     .ornament {
       position: absolute;
       top: 0;
       right: 0;
-      width: 110px;
-      height: 110px;
+      width: 120px;
+      height: 120px;
       pointer-events: none;
     }
 
@@ -184,10 +265,30 @@
 </head>
 <body>
 
-  <!-- KARTU UTAMA DUA KOLOM (DARK MODE) -->
+  <!-- 1. TOMBOL GERIGI & MENU DROPDOWN -->
+  <div class="setting-wrapper">
+    <button class="btn-gear" onclick="toggleMenu()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"></path>
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"></path>
+      </svg>
+    </button>
+
+    <!-- Pop-up Menu -->
+    <div class="popup-menu" id="popupMenu">
+      <button class="btn-menu-kembali">
+        <span>←</span> Kembali
+      </button>
+      <button class="btn-menu-sakit">
+        <span>🌡️</span> Sakit
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. KARTU UTAMA ABSENSI -->
   <div class="main-card">
     
-    <!-- KOLOM KIRI: INPUT ID & STATUS -->
+    <!-- KOLOM KIRI -->
     <div class="left-panel">
       <div>
         <!-- Status Indicator -->
@@ -202,7 +303,7 @@
         <div class="title-main">Absensi Digital<br>Pondok Pesantren Sidogiri</div>
         <div class="title-sub">Koordinasi Kontroling</div>
 
-        <!-- Input Box ID PPS -->
+        <!-- Input ID -->
         <input type="text" class="input-box" placeholder="Masukkan ID PPS/ ID Pengurus" autofocus>
       </div>
 
@@ -212,7 +313,7 @@
       </div>
     </div>
 
-    <!-- KOLOM KANAN: PROFIL PANEL -->
+    <!-- KOLOM KANAN -->
     <div class="right-panel">
       <!-- Ornamen Warna Pojok Kanan -->
       <svg class="ornament" viewBox="0 0 100 100" fill="none">
@@ -222,16 +323,23 @@
 
       <div class="profile-header">
         <div class="profile-title">Profile</div>
-        <div class="profile-time">07.23.29 WIS</div>
+        <div class="profile-time">07.15.00 WIS</div>
       </div>
 
       <div class="profile-content">
-        <!-- Area tempat menampilkan data hasil scan -->
-        Silahkan scan / masukkan ID PPS
+        <!-- Tempat untuk menampilkan profil setelah di-scan -->
       </div>
     </div>
 
   </div>
+
+  <!-- Script Toggle Menu Gerigi -->
+  <script>
+    function toggleMenu() {
+      var menu = document.getElementById('popupMenu');
+      menu.classList.toggle('show');
+    }
+  </script>
 
 </body>
 </html>
