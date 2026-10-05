@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard & Presensi Kegiatan</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { display: flex; background: #f8fafc; color: #334155; }
+    
+    .sidebar { width: 240px; background: #fff; border-right: 1px solid #e2e8f0; height: 100vh; padding: 20px; position: fixed; }
+    .sidebar h3 { color: #059669; font-size: 20px; margin-bottom: 30px; display: flex; align-items: center; gap: 8px; }
+    .menu { list-style: none; }
+    .menu li { margin-bottom: 8px; }
+    .menu a { text-decoration: none; color: #64748b; padding: 10px 14px; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; }
+    .menu a.active, .menu a:hover { background: #ecfdf5; color: #059669; font-weight: 600; }
+
+    .main { flex: 1; margin-left: 240px; padding: 20px 30px; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    
+    .cards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 25px; }
+    .card { padding: 20px; border-radius: 12px; color: white; display: flex; justify-content: space-between; align-items: center; }
+    .card h1 { font-size: 28px; }
+    .card p { font-size: 12px; opacity: 0.9; }
+    .card-1 { background: #10b981; } .card-2 { background: #0ea5e9; }
+    .card-3 { background: #3b82f6; } .card-4 { background: #f59e0b; }
+
+    .section-box { background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 25px; }
+    .section-title { font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #475569; }
+    .form-control { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
+    .form-control:focus { border-color: #10b981; }
+    
+    .btn-green { background: #059669; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-green:hover { background: #047857; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; font-size: 14px; }
+    th { background: #f1f5f9; color: #334155; }
+
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+    .badge-success { background: #dcfce7; color: #15803d; }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h3><i class="fa-solid fa-users-gear"></i> Personalia</h3>
+    <ul class="menu">
+      <li><a class="active" onclick="showTab('dashboard')"><i class="fa-solid fa-house"></i> Beranda</a></li>
+      <li><a onclick="showTab('presensi')"><i class="fa-solid fa-clipboard-user"></i> Isi Presensi</a></li>
+      <li><a onclick="showTab('import')"><i class="fa-solid fa-file-excel"></i> Import Master Data</a></li>
+    </ul>
+  </div>
+
+  <div class="main">
+    <div class="top-bar">
+      <h2>Presensi & Master Data TTQ</h2>
+      <span><i class="fa-solid fa-user-circle"></i> M. HIDAYATULLOH</span>
+    </div>
+
+    <!-- TAB 1: DASHBOARD -->
+    <div id="tab-dashboard">
+      <div class="cards-grid">
+        <div class="card card-1"><div><h1 id="stat-total">0</h1><p>Master Pengurus</p></div><i class="fa-solid fa-user-tie fa-2x"></i></div>
+        <div class="card card-2"><div><h1>12</h1><p>Kegiatan Aktif</p></div><i class="fa-solid fa-calendar-days fa-2x"></i></div>
+        <div class="card card-3"><div><h1>730</h1><p>Total Presensi</p></div><i class="fa-solid fa-check-double fa-2x"></i></div>
+        <div class="card card-4"><div><h1>98%</h1><p>Persentase Kehadiran</p></div><i class="fa-solid fa-chart-pie fa-2x"></i></div>
+      </div>
+
+      <div class="section-box">
+        <div class="section-title"><i class="fa-solid fa-users"></i> Data Master Pengurus (Tersimpan)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>NIUP / ID</th>
+              <th>Nama Lengkap</th>
+              <th>Jabatan / Instansi</th>
+            </tr>
+          </thead>
+          <tbody id="master-table-body">
+            <tr><td colspan="4" style="text-align: center; color: #94a3b8;">Belum ada data. Silakan import file Excel.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: ISI PRESENSI KEGIATAN -->
+    <div id="tab-presensi" style="display: none;">
+      <div class="section-box">
+        <div class="section-title"><i class="fa-solid fa-pen-to-square"></i> Input Presensi Kegiatan</div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div class="form-group">
+            <label>Pilih Kegiatan / Acara</label>
+            <select class="form-control" id="select-kegiatan">
+              <option value="">-- Pilih Kegiatan --</option>
+              <option value="Rapat Mingguan TTQ">Rapat Mingguan TTQ</option>
+              <option value="Kajian Rutin">Kajian Rutin</option>
+              <option value="Setoran Al-Qur'an">Setoran Al-Qur'an</option>
+              <option value="Evaluasi Bulanan">Evaluasi Bulanan</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Tanggal Kegiatan</label>
+            <input type="date" class="form-control" id="tgl-kegiatan">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Pilih Pengurus / Peserta</label>
+          <select class="form-control" id="select-pengurus">
+            <option value="">-- Import Data Excel Dulu --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Status Kehadiran</label>
+          <select class="form-control" id="select-status">
+            <option value="Hadir">Hadir</option>
+            <option value="Izin">Izin</option>
+            <option value="Sakit">Sakit</option>
+            <option value="Alpha">Alpha</option>
+          </select>
+        </div>
+
+        <button class="btn-green" onclick="simpanPresensi()"><i class="fa-solid fa-save"></i> Simpan Presensi</button>
+      </div>
+
+      <div class="section-box">
+        <div class="section-title"><i class="fa-solid fa-history"></i> Riwayat Presensi Terakhir</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Kegiatan</th>
+              <th>Nama Pengurus</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="presensi-log-body">
+            <tr><td colspan="4" style="text-align: center; color: #94a3b8;">Belum ada riwayat presensi.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: IMPORT EXCEL -->
+    <div id="tab-import" style="display: none;">
+      <div class="section-box">
+        <div class="section-title"><i class="fa-solid fa-file-excel"></i> Upload File Master Excel</div>
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
+          Pastikan format kolom di file Excel kamu memiliki header: <strong>ID</strong>, <strong>Nama</strong>, dan <strong>Jabatan</strong>.
+        </p>
+
+        <div class="form-group">
+          <input type="file" id="excel-file" class="form-control" accept=".xlsx, .xls">
+        </div>
+
+        <button class="btn-green" onclick="processExcel()"><i class="fa-solid fa-upload"></i> Proses Import</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let masterData = [];
+    let presensiLog = [];
+
+    function showTab(tabName) {
+      document.getElementById('tab-dashboard').style.display = tabName === 'dashboard' ? 'block' : 'none';
+      document.getElementById('tab-presensi').style.display = tabName === 'presensi' ? 'block' : 'none';
+      document.getElementById('tab-import').style.display = tabName === 'import' ? 'block' : 'none';
+
+      const menuLinks = document.querySelectorAll('.menu a');
+      menuLinks.forEach(a => a.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+    }
+
+    function processExcel() {
+      const fileInput = document.getElementById('excel-file');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert('Pilih file Excel terlebih dahulu!');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheet];
+        
+        masterData = XLSX.utils.sheet_to_json(worksheet);
+
+        renderMasterTable();
+        updatePengurusDropdown();
+        alert('Master data berhasil diimport! Total: ' + masterData.length + ' data.');
+        showTab('dashboard');
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function renderMasterTable() {
+      const tbody = document.getElementById('master-table-body');
+      document.getElementById('stat-total').innerText = masterData.length;
+
+      if (masterData.length === 0) return;
+
+      tbody.innerHTML = '';
+      masterData.forEach((row, index) => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${row.ID || row.id || '-'}</td>
+            <td>${row.Nama || row.nama || '-'}</td>
+            <td>${row.Jabatan || row.jabatan || '-'}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function updatePengurusDropdown() {
+      const select = document.getElementById('select-pengurus');
+      select.innerHTML = '<option value="">-- Pilih Pengurus --</option>';
+      masterData.forEach(row => {
+        const nama = row.Nama || row.nama;
+        if (nama) {
+          select.innerHTML += `<option value="${nama}">${nama}</option>`;
+        }
+      });
+    }
+
+    function simpanPresensi() {
+      const kegiatan = document.getElementById('select-kegiatan').value;
+      const tanggal = document.getElementById('tgl-kegiatan').value;
+      const nama = document.getElementById('select-pengurus').value;
+      const status = document.getElementById('select-status').value;
+
+      if (!kegiatan || !tanggal || !nama) {
+        alert('Mohon lengkapi semua data presensi!');
+        return;
+      }
+
+      presensiLog.unshift({ tanggal, kegiatan, nama, status });
+      renderPresensiLog();
+      alert('Presensi berhasil disimpan!');
+    }
+
+    function renderPresensiLog() {
+      const tbody = document.getElementById('presensi-log-body');
+      tbody.innerHTML = '';
+      presensiLog.forEach(log => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${log.tanggal}</td>
+            <td>${log.kegiatan}</td>
+            <td>${log.nama}</td>
+            <td><span class="badge badge-success">${log.status}</span></td>
+          </tr>
+        `;
+      });
+    }
+
+    document.getElementById('tgl-kegiatan').valueAsDate = new Date();
+  </script>
+</body>
+</html>
