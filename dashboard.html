@@ -96,7 +96,7 @@
     }
 
     /* ==========================================
-       2. MAIN CONTENT AREA (BERANDA - GAMBAR 2)
+       2. MAIN CONTENT AREA (BERANDA)
        ========================================== */
     .main-wrapper {
       flex: 1;
@@ -137,7 +137,6 @@
       flex: 1;
     }
 
-    /* Panel Terminal Presensi */
     .terminal-card {
       background: #0e1626;
       border: 1px solid #1a2536;
@@ -174,9 +173,9 @@
       font-weight: 700;
       font-size: 13px;
       outline: none;
+      cursor: pointer;
     }
 
-    /* Box Scan ID di Beranda */
     .scan-dropzone {
       border: 2px dashed #0088ff;
       background: rgba(0, 136, 255, 0.03);
@@ -248,17 +247,28 @@
     }
 
     .table-log td {
-      padding: 20px;
-      color: #64748b;
+      padding: 14px 20px;
+      color: #cbd5e1;
       font-size: 13px;
-      text-align: center;
+      border-top: 1px solid #1a2536;
     }
 
+    .badge-status {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-block;
+    }
+    .badge-hadir { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+    .badge-sakit { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #f87171; }
+    .badge-izin { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; }
+
     /* ==========================================
-       3. HALAMAN SCAN FOKUS / MODAL (GAMBAR 1)
+       3. HALAMAN SCAN FOKUS / MODAL (FULLSCREEN)
        ========================================== */
     .scan-focus-view {
-      display: none; /* Default tersembunyi */
+      display: none;
       position: fixed;
       top: 0;
       left: 0;
@@ -275,7 +285,6 @@
       display: flex;
     }
 
-    /* Tombol Gerigi & Menu Dropdown */
     .setting-wrapper {
       position: fixed;
       top: 30px;
@@ -330,7 +339,7 @@
       font-size: 13px;
     }
 
-    .btn-menu-sakit {
+    .btn-menu-udzur {
       background-color: #2563eb;
       color: white;
       border: none;
@@ -344,7 +353,6 @@
       font-size: 13px;
     }
 
-    /* Card Kartu Absensi Mode Gelap */
     .focus-card {
       background: #0e1626;
       border: 1px solid #1a2536;
@@ -462,13 +470,83 @@
       height: 100px;
       pointer-events: none;
     }
+
+    /* ==========================================
+       4. MODAL INPUT UDZUR (SAKIT & IZIN)
+       ========================================== */
+    .udzur-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 20000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .udzur-modal-overlay.active {
+      display: flex;
+    }
+
+    .udzur-modal-box {
+      background: #0e1626;
+      border: 1px solid #1a2536;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 400px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .udzur-modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #00d2ff;
+      margin-bottom: 15px;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 10px 14px;
+      background: #141f33;
+      border: 1px solid #1a2536;
+      border-radius: 8px;
+      color: #ffffff;
+      margin-bottom: 15px;
+      outline: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-cancel {
+      background: #334155;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn-submit {
+      background: #0088ff;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
 
-  <!-- ==========================================
-       SIDEBAR NAVIGASI
-       ========================================== -->
+  <!-- SIDEBAR NAVIGASI -->
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="brand-title">ABSENSI TTQ</div>
@@ -495,9 +573,7 @@
     </div>
   </aside>
 
-  <!-- ==========================================
-       HALAMAN BERANDA UTAMA (GAMBAR 2)
-       ========================================== -->
+  <!-- HALAMAN BERANDA UTAMA -->
   <div class="main-wrapper" id="berandaView">
     <header class="top-header">
       <div class="header-title">
@@ -514,13 +590,14 @@
         
         <div class="form-group">
           <label class="form-label">Pilih Kegiatan Target Presensi:</label>
-          <select class="select-box">
-            <option>Pelantikan Juri Mtq</option>
-            <option>Koordinasi Kontroling</option>
+          <select class="select-box" id="selectKegiatan" onchange="updateKegiatanTarget()">
+            <option value="Pelantikan Juri Mtq">Pelantikan Juri Mtq</option>
+            <option value="Koordinasi Kontroling" selected>Koordinasi Kontroling</option>
+            <option value="Rapat Evaluasi Bulanan">Rapat Evaluasi Bulanan</option>
           </select>
         </div>
 
-        <!-- Box Scan ID (Klik untuk masuk ke Mode Scan Fokus) -->
+        <!-- Box Scan ID -->
         <div class="scan-dropzone" onclick="bukaHalamanFokusScan()">
           <div class="scan-icon-title">║║║║ Masukkan / Scan ID PPS</div>
           <div class="scan-subtext">Ketik ID PPS lalu tekan Enter untuk menyimpan presensi. (Klik di sini untuk membuka mode full screen)</div>
@@ -528,21 +605,22 @@
         </div>
       </div>
 
+      <!-- Tabel Log Presensi (Rekapan) -->
       <div class="log-section">
         <div class="log-header-title">Log Presensi Kegiatan Ini:</div>
         <table class="table-log">
           <thead>
             <tr>
-              <th>Waktu</th>
-              <th>ID PPS</th>
-              <th>Nama Peserta</th>
-              <th>DOM</th>
-              <th>Status</th>
+              <th style="width: 15%;">Waktu</th>
+              <th style="width: 20%;">ID PPS</th>
+              <th style="width: 35%;">Nama Peserta</th>
+              <th style="width: 15%;">DOM</th>
+              <th style="width: 15%;">Status</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td colspan="5">Belum ada presensi pada kegiatan ini.</td>
+          <tbody id="logTableBody">
+            <tr id="emptyRow">
+              <td colspan="5" style="text-align: center; color: #64748b;">Belum ada presensi pada kegiatan ini.</td>
             </tr>
           </tbody>
         </table>
@@ -550,9 +628,7 @@
     </main>
   </div>
 
-  <!-- ==========================================
-       HALAMAN SCAN FOKUS / FULLSCREEN (GAMBAR 1)
-       ========================================== -->
+  <!-- HALAMAN SCAN FOKUS / MODAL FULLSCREEN -->
   <div class="scan-focus-view" id="scanFocusView">
     
     <!-- Tombol Gerigi & Menu Popup -->
@@ -564,14 +640,14 @@
         </svg>
       </button>
 
-      <!-- Dropdown Popup -->
+      <!-- Dropdown Popup Menu -->
       <div class="popup-menu" id="popupMenu">
-        <!-- TOMBOL KEMBALI KETIKA DIKLIK AKAN MENGEMBALIKAN KE BERANDA -->
         <button class="btn-menu-kembali" onclick="kembaliKeBeranda()">
           <span>←</span> Kembali
         </button>
-        <button class="btn-menu-sakit">
-          <span>🌡️</span> Sakit
+        <!-- TOMBOL DIGANTI MENJADI INPUT UDZUR -->
+        <button class="btn-menu-udzur" onclick="bukaModalUdzur()">
+          <span>📝</span> Input Udzur
         </button>
       </div>
     </div>
@@ -588,9 +664,10 @@
           </div>
 
           <div class="focus-title-main">Absensi Digital<br>Pondok Pesantren Sidogiri</div>
-          <div class="focus-title-sub">Koordinasi Kontroling</div>
+          <!-- POIN 1: TEKS KEGIATAN MENGIKUTI OPTION DARI SELECT BOX -->
+          <div class="focus-title-sub" id="displayNamaKegiatan">Koordinasi Kontroling</div>
 
-          <input type="text" id="focusInputID" class="focus-input-box" placeholder="Masukkan ID PPS/ ID Pengurus" autofocus>
+          <input type="text" id="focusInputID" class="focus-input-box" placeholder="Masukkan ID PPS/ ID Pengurus" onkeypress="handleScanInput(event)" autofocus>
         </div>
 
         <div class="focus-footer">
@@ -606,39 +683,138 @@
 
         <div class="focus-profile-header">
           <div class="focus-profile-title">Profile</div>
-          <div class="focus-profile-time">07.15.00 WIS</div>
+          <!-- POIN 2: JAM DUAL/DIGITAL REALTIME -->
+          <div class="focus-profile-time" id="realtimeClock">00.00.00 WIS</div>
         </div>
       </div>
     </div>
 
   </div>
 
-  <!-- ==========================================
-       JAVASCRIPT LOGIKA NAVIGASI
-       ========================================== -->
+  <!-- MODAL DIALOG INPUT UDZUR (SAKIT & IZIN) -->
+  <div class="udzur-modal-overlay" id="modalUdzur">
+    <div class="udzur-modal-box">
+      <div class="udzur-modal-title">Input Halangan / Udzur</div>
+      
+      <label class="form-label">ID PPS / ID Pengurus:</label>
+      <input type="text" id="udzurID" class="modal-input" placeholder="Contoh: PPS-10293">
+
+      <label class="form-label">Jenis Halangan:</label>
+      <select id="udzurJenis" class="select-box" style="margin-bottom: 15px;">
+        <option value="Sakit">Sakit</option>
+        <option value="Izin">Izin</option>
+      </select>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="tutupModalUdzur()">Batal</button>
+        <button class="btn-submit" onclick="simpanUdzur()">Simpan Rekapan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT SYSTEM LOGIC -->
   <script>
-    // Buka Mode Scan Fokus
+    // 1. DYNAMIC KEGIATAN TARGET
+    function updateKegiatanTarget() {
+      var select = document.getElementById('selectKegiatan');
+      var selectedText = select.options[select.selectedIndex].text;
+      document.getElementById('displayNamaKegiatan').innerText = selectedText;
+    }
+
+    // 2. REAL-TIME DIGITAL CLOCK (FORMAT: HH.MM.SS WIS)
+    function startRealtimeClock() {
+      setInterval(function() {
+        var now = new Date();
+        var hours = String(now.getHours()).padStart(2, '0');
+        var minutes = String(now.getMinutes()).padStart(2, '0');
+        var seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        document.getElementById('realtimeClock').innerText = hours + '.' + minutes + '.' + seconds + ' WIS';
+      }, 1000);
+    }
+    startRealtimeClock(); // Jalankan jam otomatis
+
+    // NAVIGASI HALAMAN
     function bukaHalamanFokusScan() {
+      updateKegiatanTarget();
       document.getElementById('scanFocusView').classList.add('active');
       document.getElementById('focusInputID').focus();
     }
 
-    // Fungsi Tombol Kembali ke Beranda (Gambar 2)
     function kembaliKeBeranda() {
-      // Sembunyikan halaman scan fokus
       document.getElementById('scanFocusView').classList.remove('active');
-      // Sembunyikan menu gerigi jika sedang terbuka
       document.getElementById('popupMenu').classList.remove('show');
     }
 
-    // Toggle Tampilan Menu Gerigi
     function toggleMenuGear(event) {
       event.stopPropagation();
       var menu = document.getElementById('popupMenu');
       menu.classList.toggle('show');
     }
 
-    // Tutup popup jika mengklik area luar
+    // POIN 3: MODAL & SIMPAN UDZUR KE REKAPAN
+    function bukaModalUdzur() {
+      document.getElementById('popupMenu').classList.remove('show');
+      document.getElementById('modalUdzur').classList.add('active');
+    }
+
+    function tutupModalUdzur() {
+      document.getElementById('modalUdzur').classList.remove('active');
+      document.getElementById('udzurID').value = '';
+    }
+
+    function simpanUdzur() {
+      var id = document.getElementById('udzurID').value.trim();
+      var jenis = document.getElementById('udzurJenis').value;
+
+      if (!id) {
+        alert('Harap masukkan ID PPS / ID Pengurus!');
+        return;
+      }
+
+      tambahKeRekapanLog(id, "Peserta (" + id + ")", "A-12", jenis);
+      tutupModalUdzur();
+      alert('Data udzur (' + jenis + ') berhasil masuk ke rekapan presensi!');
+    }
+
+    // INPUT HADIR VIA ENTER SCANNER
+    function handleScanInput(event) {
+      if (event.key === 'Enter') {
+        var inputVal = event.target.value.trim();
+        if (inputVal !== '') {
+          tambahKeRekapanLog(inputVal, "Peserta (" + inputVal + ")", "B-04", "Hadir");
+          event.target.value = '';
+        }
+      }
+    }
+
+    // FUNGSI MEMASUKKAN DATA KE TABEL REKAPAN
+    function tambahKeRekapanLog(id, nama, dom, status) {
+      var tbody = document.getElementById('logTableBody');
+      var emptyRow = document.getElementById('emptyRow');
+      if (emptyRow) {
+        emptyRow.remove();
+      }
+
+      var now = new Date();
+      var waktu = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+      var badgeClass = "badge-hadir";
+      if (status === "Sakit") badgeClass = "badge-sakit";
+      if (status === "Izin") badgeClass = "badge-izin";
+
+      var tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${waktu}</td>
+        <td>${id}</td>
+        <td>${nama}</td>
+        <td>${dom}</td>
+        <td><span class="badge-status ${badgeClass}">${status}</span></td>
+      `;
+
+      tbody.insertBefore(tr, tbody.firstChild);
+    }
+
     window.onclick = function(event) {
       var menu = document.getElementById('popupMenu');
       if (menu && menu.classList.contains('show')) {
