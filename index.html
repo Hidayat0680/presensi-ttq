@@ -8,39 +8,111 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
-<div id="loginScreen" class="login-screen">
-  <div class="login-box">
-    <h1>🌙 TTQ SIDOGIRI</h1>
-    <p>Cabang Pasuruan</p>
-    <input type="text" id="loginUser" placeholder="Username (admin)">
-    <input type="password" id="loginPass" placeholder="Password (admin123)">
-    <button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="doLogin()">🔐 LOGIN (atau tekan ENTER)</button>
-    <button class="btn" style="width:100%;margin-top:10px;background:#eee;color:#333" onclick="resetLogin()">♻️ RESET LOGIN JIKA GAGAL</button>
-    <p style="font-size:12px;margin-top:15px;color:#666">Default:<br><b>admin / admin123</b></p>
-    <div id="loginError" style="color:red;margin-top:10px;font-weight:bold"></div>
-  </div>
-</div>
-<div id="app" style="display:none">
 <div class="header">
-  <div style="display:flex;justify-content:space-between;align-items:center">
-    <div><h1 style="margin:0;font-size:20px">🌙 PRESENSI TTQ SIDOGIRI</h1><small>Login: <b id="infoUser"></b> (<span id="infoRole"></span>)</small></div>
-    <button class="btn btn-danger btn-sm" onclick="doLogout()">LOGOUT</button>
-  </div>
+  <h1 style="margin:0">🌙 PRESENSI TTQ SIDOGIRI - Pasuruan</h1>
+  <small>Mode tanpa login (sementara)</small>
 </div>
 <div class="tabs">
-  <button class="tab active" onclick="openTab('presensi')">Presensi</button>
-  <button class="tab" onclick="openTab('master')">Master</button>
+  <button class="tab active" onclick="openTab('presensi')">Presensi ENTER</button>
+  <button class="tab" onclick="openTab('master')">Data Master</button>
   <button class="tab" onclick="openTab('laporan')">Laporan</button>
-  <button class="tab" id="tabPenggunaBtn" onclick="openTab('pengguna')">Pengguna</button>
 </div>
 <div id="tab-presensi" class="tab-content active">
-  <div class="card"><h3>Ketik IDPPS + ENTER</h3><input type="text" id="inputIDPPS" placeholder="IDPPS + ENTER..."><div id="scanResult"></div></div>
-  <div class="card"><div class="card-head"><h3>Hari Ini: <span id="tglHariIni"></span></h3><span id="jumlahHadir">0</span></div><div class="table-wrap"><table><thead><tr><th>Jam</th><th>IDPPS</th><th>Nama</th><th>Aksi</th></tr></thead><tbody id="tabelHadirHariIni"></tbody></table></div><div class="actions"><button class="btn btn-warning" onclick="hapusHariIni()">Hapus Hari Ini</button><button class="btn btn-danger" onclick="hapusSemuaPresensi()">Hapus SEMUA</button></div></div>
+  <div class="card">
+    <h3>Ketik IDPPS + ENTER</h3>
+    <input type="text" id="inputIDPPS" placeholder="Ketik IDPPS lalu ENTER...">
+    <div id="scanResult" style="margin-top:10px;font-weight:bold"></div>
+  </div>
+  <div class="card">
+    <h3>Hari Ini: <span id="tglHariIni"></span> - <span id="jumlahHadir">0</span></h3>
+    <div class="table-wrap"><table><thead><tr><th>Jam</th><th>IDPPS</th><th>Nama</th><th>Aksi</th></tr></thead><tbody id="tabelHadirHariIni"></tbody></table></div>
+    <div class="actions">
+      <button class="btn btn-warning" onclick="hapusHariIni()">Hapus Hari Ini</button>
+      <button class="btn btn-danger" onclick="hapusSemuaPresensi()">Hapus SEMUA</button>
+    </div>
+  </div>
 </div>
-<div id="tab-master" class="tab-content"><div class="card"><h3>Data Santri</h3><p>Total: <b id="totalSantri">0</b></p><div class="actions"><label class="btn btn-primary">Import Excel<input type="file" id="fileExcel" accept=".xlsx,.xls" hidden></label><button class="btn btn-danger" onclick="hapusSemuaSantri()">Hapus Semua Santri</button></div><input type="text" id="cariSantri" placeholder="Cari..." onkeyup="renderMaster()"><div class="table-wrap"><table><thead><tr><th>IDPPS</th><th>Nama</th><th>Aksi</th></tr></thead><tbody id="tabelMaster"></tbody></table></div></div></div>
-<div id="tab-laporan" class="tab-content"><div class="card"><h3>Laporan</h3><input type="date" id="filterTanggal"><button class="btn btn-success" onclick="exportExcel()">Export Excel</button><div class="table-wrap"><table><thead><tr><th>Tgl</th><th>IDPPS</th><th>Nama</th><th>Jam</th><th>Aksi</th></tr></thead><tbody id="tabelLaporan"></tbody></table></div></div></div>
-<div id="tab-pengguna" class="tab-content"><div class="card"><h3>Pengguna</h3><div style="background:#f9fafb;padding:12px;border-radius:8px"><input type="text" id="newUser" placeholder="Username baru"><input type="text" id="newNama" placeholder="Nama Lengkap"><input type="password" id="newPass" placeholder="Password"><select id="newRole" style="width:100%;padding:12px;border:2px solid #d1fae5;border-radius:8px;margin:10px 0"><option value="petugas">Petugas</option><option value="admin">Admin</option></select><button class="btn btn-primary" onclick="tambahUser()">Tambah Pengguna</button></div><div class="table-wrap"><table><thead><tr><th>Username</th><th>Nama</th><th>Role</th><th>Aksi</th></tr></thead><tbody id="tabelPengguna"></tbody></table></div></div></div>
+<div id="tab-master" class="tab-content">
+  <div class="card">
+    <h3>Data Santri</h3><p>Total: <b id="totalSantri">0</b></p>
+    <label class="btn btn-primary">Import Excel<input type="file" id="fileExcel" hidden></label>
+    <button class="btn btn-danger" onclick="hapusSemuaSantri()">Hapus Semua</button>
+    <input type="text" id="cariSantri" placeholder="Cari..." onkeyup="renderMaster()">
+    <div class="table-wrap"><table><thead><tr><th>IDPPS</th><th>Nama</th><th>Aksi</th></tr></thead><tbody id="tabelMaster"></tbody></table></div>
+  </div>
 </div>
-<script src="app.js"></script>
+<div id="tab-laporan" class="tab-content">
+  <div class="card">
+    <h3>Laporan</h3><input type="date" id="filterTanggal"><button class="btn btn-success" onclick="exportExcel()">Export Excel</button>
+    <div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>IDPPS</th><th>Nama</th><th>Jam</th><th>Aksi</th></tr></thead><tbody id="tabelLaporan"></tbody></table></div>
+  </div>
+</div>
+<script>
+// VERSI TANPA LOGIN - LANGSUNG JALAN
+let santri=JSON.parse(localStorage.getItem('ttq_santri')||'[]');
+let presensi=JSON.parse(localStorage.getItem('ttq_presensi')||'[]');
+function save(){localStorage.setItem('ttq_santri',JSON.stringify(santri));localStorage.setItem('ttq_presensi',JSON.stringify(presensi));}
+function openTab(n){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab')[n==='presensi'?0:n==='master'?1:2].classList.add('active');
+  document.getElementById('tab-'+n).classList.add('active');
+}
+document.getElementById('tglHariIni').innerText=new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+document.getElementById('filterTanggal').valueAsDate=new Date();
+document.getElementById('fileExcel').addEventListener('change',e=>{
+  let file=e.target.files[0];if(!file)return;
+  let reader=new FileReader();
+  reader.onload=function(ev){
+    let wb=XLSX.read(ev.target.result,{type:'binary'});
+    let rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+    let baru=0;
+    rows.forEach(r=>{
+      let id=(r.IDPPS||'').toString().trim();
+      let nama=(r.Nama||'').toString().trim();
+      if(id&&nama&&!santri.find(s=>s.id==id)){santri.push({id,nama});baru++;}
+    });
+    save();renderMaster();alert('Import '+baru+' santri');
+  };
+  reader.readAsBinaryString(file);
+});
+document.getElementById('inputIDPPS').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    let id=e.target.value.trim();if(!id)return;
+    let s=santri.find(x=>x.id==id);
+    let res=document.getElementById('scanResult');
+    if(!s){res.innerHTML='❌ IDPPS '+id+' tidak ada';e.target.value='';return;}
+    let today=new Date().toISOString().slice(0,10);
+    if(presensi.find(p=>p.id==id&&p.tanggal==today)){res.innerHTML='⚠️ '+s.nama+' sudah hadir';}
+    else{let jam=new Date().toLocaleTimeString('id-ID');presensi.push({id,nama:s.nama,tanggal:today,jam});save();res.innerHTML='✅ '+s.nama+' HADIR '+jam;}
+    e.target.value='';renderHariIni();renderLaporan();
+  }
+});
+function renderHariIni(){
+  let today=new Date().toISOString().slice(0,10);
+  let data=presensi.filter(p=>p.tanggal==today).reverse();
+  document.getElementById('jumlahHadir').innerText=data.length+' Hadir';
+  document.getElementById('tabelHadirHariIni').innerHTML=data.map(p=>`<tr><td>${p.jam}</td><td>${p.id}</td><td>${p.nama}</td><td><button class="btn btn-danger btn-sm" onclick="hapusSatu('${p.id}','${p.tanggal}')">Hapus</button></td></tr>`).join('')||'<tr><td colspan=4>Belum ada</td></tr>';
+}
+function renderMaster(){
+  let q=(document.getElementById('cariSantri').value||'').toLowerCase();
+  let f=santri.filter(s=>s.id.toLowerCase().includes(q)||s.nama.toLowerCase().includes(q));
+  document.getElementById('totalSantri').innerText=santri.length;
+  document.getElementById('tabelMaster').innerHTML=f.map(s=>`<tr><td>${s.id}</td><td>${s.nama}</td><td><button class="btn btn-danger btn-sm" onclick="hapusSatuSantri('${s.id}')">Hapus</button></td></tr>`).join('');
+}
+function renderLaporan(){
+  let t=document.getElementById('filterTanggal').value;
+  let data=t?presensi.filter(p=>p.tanggal==t):presensi;
+  document.getElementById('tabelLaporan').innerHTML=data.reverse().map(p=>`<tr><td>${p.tanggal}</td><td>${p.id}</td><td>${p.nama}</td><td>${p.jam}</td><td><button class="btn btn-danger btn-sm" onclick="hapusSatu('${p.id}','${p.tanggal}')">Hapus</button></td></tr>`).join('')||'<tr><td colspan=5>Kosong</td></tr>';
+}
+function hapusSatu(id,tgl){if(!confirm('Hapus?'))return;presensi=presensi.filter(p=>!(p.id==id&&p.tanggal==tgl));save();renderHariIni();renderLaporan();}
+function hapusSatuSantri(id){if(!confirm('Hapus santri '+id+'?'))return;santri=santri.filter(s=>s.id!=id);save();renderMaster();}
+function hapusHariIni(){let t=new Date().toISOString().slice(0,10);if(!confirm('Hapus hari ini?'))return;presensi=presensi.filter(p=>p.tanggal!=t);save();renderHariIni();renderLaporan();}
+function hapusSemuaPresensi(){if(!confirm('Hapus SEMUA?'))return;presensi=[];save();renderHariIni();renderLaporan();}
+function hapusSemuaSantri(){if(!confirm('Hapus semua santri?'))return;santri=[];presensi=[];save();renderMaster();renderHariIni();renderLaporan();}
+function exportExcel(){let t=document.getElementById('filterTanggal').value;let d=t?presensi.filter(p=>p.tanggal==t):presensi;if(d.length==0)return alert('Kosong');let ws=XLSX.utils.json_to_sheet(d);let wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Laporan');XLSX.writeFile(wb,'Laporan.xlsx');}
+document.getElementById('filterTanggal').addEventListener('change',renderLaporan);
+renderMaster();renderHariIni();renderLaporan();
+</script>
 </body>
 </html>
