@@ -3,187 +3,355 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard & Presensi Kegiatan</title>
+  <title>Absensi TTQ - Management System</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    body { display: flex; background: #f8fafc; color: #334155; }
-    
-    .sidebar { width: 240px; background: #fff; border-right: 1px solid #e2e8f0; height: 100vh; padding: 20px; position: fixed; }
-    .sidebar h3 { color: #059669; font-size: 20px; margin-bottom: 30px; display: flex; align-items: center; gap: 8px; }
-    .menu { list-style: none; }
-    .menu li { margin-bottom: 8px; }
-    .menu a { text-decoration: none; color: #64748b; padding: 10px 14px; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; }
-    .menu a.active, .menu a:hover { background: #ecfdf5; color: #059669; font-weight: 600; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { display: flex; background: #f4f6f9; color: #334155; height: 100vh; overflow: hidden; }
 
-    .main { flex: 1; margin-left: 240px; padding: 20px 30px; }
-    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    
-    .cards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 25px; }
-    .card { padding: 20px; border-radius: 12px; color: white; display: flex; justify-content: space-between; align-items: center; }
-    .card h1 { font-size: 28px; }
-    .card p { font-size: 12px; opacity: 0.9; }
-    .card-1 { background: #10b981; } .card-2 { background: #0ea5e9; }
-    .card-3 { background: #3b82f6; } .card-4 { background: #f59e0b; }
+    /* Sidebar */
+    .sidebar { width: 250px; background: #ffffff; border-right: 1px solid #e2e8f0; height: 100vh; display: flex; flex-direction: column; }
+    .sidebar-brand { padding: 20px; font-weight: bold; font-size: 16px; color: #00bcd4; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
+    .sidebar-brand span { background: #e0f2fe; padding: 4px 10px; border-radius: 12px; font-size: 12px; }
+    .menu { list-style: none; padding: 15px 10px; flex: 1; overflow-y: auto; }
+    .menu-header { font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: bold; padding: 10px 12px 5px; }
+    .menu-item { margin-bottom: 4px; }
+    .menu-item a { text-decoration: none; color: #475569; padding: 10px 14px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+    .menu-item a:hover, .menu-item a.active { background: #00bcd4; color: white; }
+    .submenu { list-style: none; padding-left: 20px; margin-top: 4px; display: none; }
+    .submenu.open { display: block; }
+    .submenu a { padding: 8px 12px; font-size: 13px; color: #64748b; }
+    .submenu a:hover, .submenu a.active { color: #00bcd4; background: #f1f5f9; }
 
-    .section-box { background: white; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 25px; }
-    .section-title { font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+    /* Content Area */
+    .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar { height: 60px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 25px; }
+    .main-body { flex: 1; padding: 25px; overflow-y: auto; }
+
+    /* Elements */
+    .btn { padding: 8px 16px; border-radius: 6px; border: none; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
+    .btn-primary { background: #00bcd4; color: white; }
+    .btn-primary:hover { background: #00acc1; }
+    .btn-success { background: #10b981; color: white; }
+    .btn-warning { background: #f59e0b; color: white; }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-edit { background: #8bc34a; color: white; padding: 6px 10px; }
+    .btn-reload { background: #ff5722; color: white; padding: 6px 10px; }
+
+    .card { background: white; border-radius: 10px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .card-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #1e293b; display: flex; justify-content: space-between; align-items: center; }
 
     .form-group { margin-bottom: 15px; }
     .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #475569; }
-    .form-control { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
-    .form-control:focus { border-color: #10b981; }
-    
-    .btn-green { background: #059669; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
-    .btn-green:hover { background: #047857; }
+    .form-control { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; }
+    .form-control:focus { border-color: #00bcd4; }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; font-size: 14px; }
-    th { background: #f1f5f9; color: #334155; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border-bottom: 1px solid #f1f5f9; padding: 12px 10px; text-align: left; font-size: 14px; }
+    th { background: #f8fafc; color: #475569; font-weight: 600; }
+    tr:hover { background: #fafafa; }
 
-    .badge { padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+    .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
     .badge-success { background: #dcfce7; color: #15803d; }
+    .badge-danger { background: #fee2e2; color: #b91c1c; }
+
+    .search-filter-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .search-input { width: 250px; }
+
+    /* Scan / Quick Entry Box */
+    .scan-box { background: #e0f2fe; border: 2px dashed #0284c7; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
+    .scan-input { font-size: 20px; text-align: center; letter-spacing: 2px; font-weight: bold; text-transform: uppercase; }
   </style>
 </head>
 <body>
 
+  <!-- SIDEBAR -->
   <div class="sidebar">
-    <h3><i class="fa-solid fa-users-gear"></i> Personalia</h3>
+    <div class="sidebar-brand">
+      ABSENSI TTQ
+      <span>F1</span>
+    </div>
     <ul class="menu">
-      <li><a class="active" onclick="showTab('dashboard')"><i class="fa-solid fa-house"></i> Beranda</a></li>
-      <li><a onclick="showTab('presensi')"><i class="fa-solid fa-clipboard-user"></i> Isi Presensi</a></li>
-      <li><a onclick="showTab('import')"><i class="fa-solid fa-file-excel"></i> Import Master Data</a></li>
+      <li class="menu-item">
+        <a id="nav-dashboard" class="active" onclick="showTab('dashboard')">
+          <span><i class="fa-solid fa-gauge fa-fw"></i> Dashboard</span>
+        </a>
+      </li>
+      
+      <li class="menu-header">Data Master</li>
+      <li class="menu-item">
+        <a id="nav-kegiatan" onclick="showTab('kegiatan')">
+          <span><i class="fa-solid fa-list-check fa-fw"></i> Kegiatan</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a id="nav-peserta" onclick="showTab('peserta')">
+          <span><i class="fa-solid fa-users fa-fw"></i> Master Peserta (Excel)</span>
+        </a>
+      </li>
+
+      <li class="menu-header">Presensi</li>
+      <li class="menu-item">
+        <a id="nav-presensi" onclick="showTab('presensi')">
+          <span><i class="fa-solid fa-qrcode fa-fw"></i> Scan / Input ID PPS</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a id="nav-riwayat" onclick="showTab('riwayat')">
+          <span><i class="fa-solid fa-clock-rotate-left fa-fw"></i> Rekap Presensi</span>
+        </a>
+      </li>
     </ul>
   </div>
 
-  <div class="main">
-    <div class="top-bar">
-      <h2>Presensi & Master Data TTQ</h2>
-      <span><i class="fa-solid fa-user-circle"></i> M. HIDAYATULLOH</span>
+  <!-- CONTENT -->
+  <div class="content">
+    <div class="topbar">
+      <div><strong id="page-title">Dashboard Keaktifan Absensi</strong></div>
+      <div><i class="fa-solid fa-user-circle"></i> M. HIDAYATULLOH</div>
     </div>
 
-    <!-- TAB 1: DASHBOARD -->
-    <div id="tab-dashboard">
-      <div class="cards-grid">
-        <div class="card card-1"><div><h1 id="stat-total">0</h1><p>Master Pengurus</p></div><i class="fa-solid fa-user-tie fa-2x"></i></div>
-        <div class="card card-2"><div><h1>12</h1><p>Kegiatan Aktif</p></div><i class="fa-solid fa-calendar-days fa-2x"></i></div>
-        <div class="card card-3"><div><h1>730</h1><p>Total Presensi</p></div><i class="fa-solid fa-check-double fa-2x"></i></div>
-        <div class="card card-4"><div><h1>98%</h1><p>Persentase Kehadiran</p></div><i class="fa-solid fa-chart-pie fa-2x"></i></div>
+    <div class="main-body">
+
+      <!-- TAB 1: DASHBOARD -->
+      <div id="tab-dashboard">
+        <div class="card">
+          <div class="card-title">
+            <span>Ringkasan Kegiatan & Presensi</span>
+            <button class="btn btn-primary" onclick="showTab('kegiatan')"><i class="fa-solid fa-plus"></i> Tambah Kegiatan Baru</button>
+          </div>
+          <p style="color: #64748b; font-size: 14px;">Silakan atur kegiatan pada menu <strong>Data Master > Kegiatan</strong> lalu lakukan presensi dengan memasukkan ID PPS.</p>
+        </div>
       </div>
 
-      <div class="section-box">
-        <div class="section-title"><i class="fa-solid fa-users"></i> Data Master Pengurus (Tersimpan)</div>
-        <table>
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>NIUP / ID</th>
-              <th>Nama Lengkap</th>
-              <th>Jabatan / Instansi</th>
-            </tr>
-          </thead>
-          <tbody id="master-table-body">
-            <tr><td colspan="4" style="text-align: center; color: #94a3b8;">Belum ada data. Silakan import file Excel.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <!-- TAB 2: DATA MASTER KEGIATAN -->
+      <div id="tab-kegiatan" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Daftar Kegiatan Master</span>
+            <button class="btn btn-primary" onclick="toggleFormKegiatan()"><i class="fa-solid fa-plus"></i> Entri F1</button>
+          </div>
 
-    <!-- TAB 2: ISI PRESENSI KEGIATAN -->
-    <div id="tab-presensi" style="display: none;">
-      <div class="section-box">
-        <div class="section-title"><i class="fa-solid fa-pen-to-square"></i> Input Presensi Kegiatan</div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <!-- Form Tambah Kegiatan -->
+          <div id="form-kegiatan-box" style="display: none; background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #cbd5e1;">
+            <h4 style="margin-bottom: 10px;">Tambah Kegiatan Baru</h4>
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px;">
+              <div class="form-group">
+                <label>Nama Kegiatan</label>
+                <input type="text" id="input-nama-kegiatan" class="form-control" placeholder="Contoh: Pelantikan Juri Mtq">
+              </div>
+              <div class="form-group">
+                <label>Tanggal Kegiatan</label>
+                <input type="date" id="input-tgl-kegiatan" class="form-control">
+              </div>
+            </div>
+            <button class="btn btn-success" onclick="simpanKegiatanBaru()"><i class="fa-solid fa-save"></i> Simpan Kegiatan</button>
+          </div>
+
+          <div class="search-filter-bar">
+            <div>Show <select><option>10</option></select> entries</div>
+            <div>Search: <input type="text" class="form-control search-input" onkeyup="filterTable(this, 'table-kegiatan-body')"></div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th width="40"><input type="checkbox"></th>
+                <th width="50">No</th>
+                <th>Kegiatan</th>
+                <th>Peserta Hadir</th>
+                <th>Tanggal</th>
+                <th width="120" style="text-align: center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="table-kegiatan-body">
+              <!-- Render otomatis dari JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 3: MASTER PESERTA (IMPORT EXCEL) -->
+      <div id="tab-peserta" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Import Master Data Santri / Pengurus (Excel)</span>
+          </div>
+          <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
+            Format Excel harus berisi kolom: <strong>ID</strong> (NIP/ID PPS), <strong>Nama</strong>, dan <strong>Jabatan</strong>.
+          </p>
+          <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input type="file" id="excel-file" class="form-control" accept=".xlsx, .xls">
+            <button class="btn btn-success" onclick="processExcel()"><i class="fa-solid fa-file-excel"></i> Import</button>
+          </div>
+
+          <table style="margin-top: 15px;">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>ID PPS / NIP</th>
+                <th>Nama Peserta</th>
+                <th>Jabatan / Instansi</th>
+              </tr>
+            </thead>
+            <tbody id="table-master-peserta">
+              <tr><td colspan="4" style="text-align: center; color: #94a3b8;">Belum ada master peserta. Silakan upload file Excel.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 4: SCAN / INPUT ID PPS PRESENSI -->
+      <div id="tab-presensi" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Isi Presensi Kegiatan</span>
+          </div>
+
           <div class="form-group">
-            <label>Pilih Kegiatan / Acara</label>
-            <select class="form-control" id="select-kegiatan">
-              <option value="">-- Pilih Kegiatan --</option>
-              <option value="Rapat Mingguan TTQ">Rapat Mingguan TTQ</option>
-              <option value="Kajian Rutin">Kajian Rutin</option>
-              <option value="Setoran Al-Qur'an">Setoran Al-Qur'an</option>
-              <option value="Evaluasi Bulanan">Evaluasi Bulanan</option>
+            <label>Pilih Kegiatan Target Presensi:</label>
+            <select id="select-kegiatan-presensi" class="form-control" style="font-weight: bold; color: #00bcd4;">
+              <!-- Auto filled from list kegiatan -->
             </select>
           </div>
 
-          <div class="form-group">
-            <label>Tanggal Kegiatan</label>
-            <input type="date" class="form-control" id="tgl-kegiatan">
+          <div class="scan-box">
+            <h3 style="margin-bottom: 10px; color: #0369a1;"><i class="fa-solid fa-barcode"></i> Masukkan / Scan ID PPS</h3>
+            <p style="font-size: 13px; color: #0284c7; margin-bottom: 15px;">Ketik ID PPS lalu tekan Enter untuk menyimpan presensi secara otomatis.</p>
+            <input type="text" id="input-id-pps" class="form-control scan-input" placeholder="Masukkan ID PPS..." onkeydown="checkInputId(event)">
           </div>
-        </div>
 
-        <div class="form-group">
-          <label>Pilih Pengurus / Peserta</label>
-          <select class="form-control" id="select-pengurus">
-            <option value="">-- Import Data Excel Dulu --</option>
-          </select>
-        </div>
+          <div id="presensi-alert" style="display: none; padding: 12px; border-radius: 6px; font-weight: bold; margin-bottom: 15px; text-align: center;"></div>
 
-        <div class="form-group">
-          <label>Status Kehadiran</label>
-          <select class="form-control" id="select-status">
-            <option value="Hadir">Hadir</option>
-            <option value="Izin">Izin</option>
-            <option value="Sakit">Sakit</option>
-            <option value="Alpha">Alpha</option>
-          </select>
+          <h4>Log Presensi Sesi Ini:</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>Waktu</th>
+                <th>ID PPS</th>
+                <th>Nama Peserta</th>
+                <th>Kegiatan</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="table-log-presensi">
+              <tr><td colspan="5" style="text-align: center; color: #94a3b8;">Belum ada masukan presensi pada sesi ini.</td></tr>
+            </tbody>
+          </table>
         </div>
-
-        <button class="btn-green" onclick="simpanPresensi()"><i class="fa-solid fa-save"></i> Simpan Presensi</button>
       </div>
 
-      <div class="section-box">
-        <div class="section-title"><i class="fa-solid fa-history"></i> Riwayat Presensi Terakhir</div>
-        <table>
-          <thead>
-            <tr>
-              <th>Tanggal</th>
-              <th>Kegiatan</th>
-              <th>Nama Pengurus</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="presensi-log-body">
-            <tr><td colspan="4" style="text-align: center; color: #94a3b8;">Belum ada riwayat presensi.</td></tr>
-          </tbody>
-        </table>
+      <!-- TAB 5: REKAP RIWAYAT -->
+      <div id="tab-riwayat" style="display: none;">
+        <div class="card">
+          <div class="card-title"><span>Rekapitulasi Semua Presensi</span></div>
+          <table>
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Kegiatan</th>
+                <th>ID PPS</th>
+                <th>Nama Peserta</th>
+                <th>Waktu Presensi</th>
+              </tr>
+            </thead>
+            <tbody id="table-rekap-semua">
+              <!-- Auto Render -->
+            </tbody>
+          </table>
+        </div>
       </div>
+
     </div>
-
-    <!-- TAB 3: IMPORT EXCEL -->
-    <div id="tab-import" style="display: none;">
-      <div class="section-box">
-        <div class="section-title"><i class="fa-solid fa-file-excel"></i> Upload File Master Excel</div>
-        <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
-          Pastikan format kolom di file Excel kamu memiliki header: <strong>ID</strong>, <strong>Nama</strong>, dan <strong>Jabatan</strong>.
-        </p>
-
-        <div class="form-group">
-          <input type="file" id="excel-file" class="form-control" accept=".xlsx, .xls">
-        </div>
-
-        <button class="btn-green" onclick="processExcel()"><i class="fa-solid fa-upload"></i> Proses Import</button>
-      </div>
-    </div>
-
   </div>
 
   <script>
-    let masterData = [];
-    let presensiLog = [];
+    // State Aplikasi
+    let listKegiatan = JSON.parse(localStorage.getItem('ttq_kegiatan')) || [
+      { id: 1, nama: "Pelantikan Juri Mtq", tanggal: "Hari Ini" },
+      { id: 2, nama: "Koordinasi Kontroling", tanggal: "Hari Ini" },
+      { id: 3, nama: "Pemaduan Muallim", tanggal: "Hari Ini" },
+      { id: 4, nama: "Koordinasi Muallim Mqs", tanggal: "Hari Ini" },
+      { id: 5, nama: "Koordinasi Mtq 1", tanggal: "Hari Ini" },
+      { id: 6, nama: "Koordinasi Sesi 2", tanggal: "Esok Hari" }
+    ];
 
+    let masterPeserta = JSON.parse(localStorage.getItem('ttq_master_peserta')) || [];
+    let logPresensi = JSON.parse(localStorage.getItem('ttq_log_presensi')) || [];
+
+    // Navigasi Tab
     function showTab(tabName) {
-      document.getElementById('tab-dashboard').style.display = tabName === 'dashboard' ? 'block' : 'none';
-      document.getElementById('tab-presensi').style.display = tabName === 'presensi' ? 'block' : 'none';
-      document.getElementById('tab-import').style.display = tabName === 'import' ? 'block' : 'none';
+      const tabs = ['dashboard', 'kegiatan', 'peserta', 'presensi', 'riwayat'];
+      tabs.forEach(t => {
+        document.getElementById('tab-' + t).style.display = t === tabName ? 'block' : 'none';
+        const navEl = document.getElementById('nav-' + t);
+        if (navEl) {
+          if (t === tabName) navEl.classList.add('active');
+          else navEl.classList.remove('active');
+        }
+      });
 
-      const menuLinks = document.querySelectorAll('.menu a');
-      menuLinks.forEach(a => a.classList.remove('active'));
-      event.currentTarget.classList.add('active');
+      if (tabName === 'kegiatan') renderKegiatanTable();
+      if (tabName === 'peserta') renderMasterPesertaTable();
+      if (tabName === 'presensi') updateSelectKegiatan();
+      if (tabName === 'riwayat') renderRekapSemua();
     }
 
+    // Toggle Form Tambah Kegiatan
+    function toggleFormKegiatan() {
+      const box = document.getElementById('form-kegiatan-box');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+      document.getElementById('input-tgl-kegiatan').valueAsDate = new Date();
+    }
+
+    // Simpan Kegiatan Baru
+    function simpanKegiatanBaru() {
+      const nama = document.getElementById('input-nama-kegiatan').value;
+      const tgl = document.getElementById('input-tgl-kegiatan').value;
+
+      if (!nama) {
+        alert('Nama kegiatan tidak boleh kosong!');
+        return;
+      }
+
+      const newId = listKegiatan.length > 0 ? listKegiatan[listKegiatan.length - 1].id + 1 : 1;
+      listKegiatan.push({ id: newId, nama: nama, tanggal: tgl || 'Hari Ini' });
+
+      localStorage.setItem('ttq_kegiatan', JSON.stringify(listKegiatan));
+      alert('Kegiatan berhasil ditambahkan!');
+      document.getElementById('input-nama-kegiatan').value = '';
+      toggleFormKegiatan();
+      renderKegiatanTable();
+    }
+
+    // Render Tabel Kegiatan
+    function renderKegiatanTable() {
+      const tbody = document.getElementById('table-kegiatan-body');
+      tbody.innerHTML = '';
+
+      listKegiatan.forEach((item, index) => {
+        // Hitung jumlah peserta yang sudah presensi di kegiatan ini
+        const countHadir = logPresensi.filter(p => p.kegiatan === item.nama).length;
+
+        tbody.innerHTML += `
+          <tr>
+            <td><input type="checkbox"></td>
+            <td>${index + 1}</td>
+            <td><strong>${item.nama}</strong></td>
+            <td>${countHadir} Santri (${countHadir} Aktif, 0 Izin/Sakit)</td>
+            <td>Tgl ${item.tanggal}</td>
+            <td style="text-align: center;">
+              <button class="btn btn-reload" title="Reset Presensi" onclick="resetPresensiKegiatan('${item.nama}')"><i class="fa-solid fa-rotate-right"></i></button>
+              <button class="btn btn-edit" title="Pilih Presensi" onclick="pilihKegiatanUntukPresensi('${item.nama}')"><i class="fa-solid fa-pen"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    // Import Excel
     function processExcel() {
       const fileInput = document.getElementById('excel-file');
       const file = fileInput.files[0];
@@ -200,28 +368,25 @@
         const firstSheet = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheet];
         
-        masterData = XLSX.utils.sheet_to_json(worksheet);
+        masterPeserta = XLSX.utils.sheet_to_json(worksheet);
+        localStorage.setItem('ttq_master_peserta', JSON.stringify(masterPeserta));
 
-        renderMasterTable();
-        updatePengurusDropdown();
-        alert('Master data berhasil diimport! Total: ' + masterData.length + ' data.');
-        showTab('dashboard');
+        alert('Master data peserta berhasil diimport! Total: ' + masterPeserta.length + ' data.');
+        renderMasterPesertaTable();
       };
       reader.readAsArrayBuffer(file);
     }
 
-    function renderMasterTable() {
-      const tbody = document.getElementById('master-table-body');
-      document.getElementById('stat-total').innerText = masterData.length;
-
-      if (masterData.length === 0) return;
+    function renderMasterPesertaTable() {
+      const tbody = document.getElementById('table-master-peserta');
+      if (masterPeserta.length === 0) return;
 
       tbody.innerHTML = '';
-      masterData.forEach((row, index) => {
+      masterPeserta.forEach((row, index) => {
         tbody.innerHTML += `
           <tr>
             <td>${index + 1}</td>
-            <td>${row.ID || row.id || '-'}</td>
+            <td><strong>${row.ID || row.id || row.NIP || '-'}</strong></td>
             <td>${row.Nama || row.nama || '-'}</td>
             <td>${row.Jabatan || row.jabatan || '-'}</td>
           </tr>
@@ -229,49 +394,134 @@
       });
     }
 
-    function updatePengurusDropdown() {
-      const select = document.getElementById('select-pengurus');
-      select.innerHTML = '<option value="">-- Pilih Pengurus --</option>';
-      masterData.forEach(row => {
-        const nama = row.Nama || row.nama;
-        if (nama) {
-          select.innerHTML += `<option value="${nama}">${nama}</option>`;
-        }
+    // Update Dropdown Pilih Kegiatan di Tab Presensi
+    function updateSelectKegiatan() {
+      const select = document.getElementById('select-kegiatan-presensi');
+      select.innerHTML = '';
+      listKegiatan.forEach(k => {
+        select.innerHTML += `<option value="${k.nama}">${k.nama}</option>`;
       });
     }
 
-    function simpanPresensi() {
-      const kegiatan = document.getElementById('select-kegiatan').value;
-      const tanggal = document.getElementById('tgl-kegiatan').value;
-      const nama = document.getElementById('select-pengurus').value;
-      const status = document.getElementById('select-status').value;
+    function pilihKegiatanUntukPresensi(namaKegiatan) {
+      showTab('presensi');
+      document.getElementById('select-kegiatan-presensi').value = namaKegiatan;
+    }
 
-      if (!kegiatan || !tanggal || !nama) {
-        alert('Mohon lengkapi semua data presensi!');
+    // Proses Presensi Masukkan ID PPS (Auto Hit Enter)
+    function checkInputId(event) {
+      if (event.key === 'Enter') {
+        const idInput = document.getElementById('input-id-pps');
+        const idPps = idInput.value.trim();
+        const kegiatan = document.getElementById('select-kegiatan-presensi').value;
+
+        if (!idPps) return;
+        if (!kegiatan) {
+          alert('Pilih kegiatan terlebih dahulu!');
+          return;
+        }
+
+        // Cari data di master peserta
+        const pesertaFound = masterPeserta.find(p => (p.ID || p.id || p.NIP || '').toString() === idPps);
+        const namaPeserta = pesertaFound ? (pesertaFound.Nama || pesertaFound.nama) : 'Peserta (' + idPps + ')';
+
+        // Cek apakah sudah presensi di kegiatan ini
+        const isAlready = logPresensi.some(p => p.idPps === idPps && p.kegiatan === kegiatan);
+
+        const alertBox = document.getElementById('presensi-alert');
+        alertBox.style.display = 'block';
+
+        if (isAlready) {
+          alertBox.style.background = '#fee2e2';
+          alertBox.style.color = '#991b1b';
+          alertBox.innerText = '⚠️ ID ' + idPps + ' (' + namaPeserta + ') SUDAN PRESENSI sebelumnya!';
+        } else {
+          const waktuStr = new Date().toLocaleTimeString();
+          logPresensi.unshift({
+            idPps: idPps,
+            nama: namaPeserta,
+            kegiatan: kegiatan,
+            waktu: waktuStr,
+            status: 'Hadir'
+          });
+
+          localStorage.setItem('ttq_log_presensi', JSON.stringify(logPresensi));
+
+          alertBox.style.background = '#dcfce7';
+          alertBox.style.color = '#166534';
+          alertBox.innerText = '✅ Presensi BERHASIL: ' + namaPeserta + ' (' + idPps + ')';
+          renderLogPresensi();
+        }
+
+        idInput.value = ''; // Reset input
+      }
+    }
+
+    function renderLogPresensi() {
+      const tbody = document.getElementById('table-log-presensi');
+      const kegiatanActive = document.getElementById('select-kegiatan-presensi').value;
+      const logsActive = logPresensi.filter(p => p.kegiatan === kegiatanActive);
+
+      if (logsActive.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8;">Belum ada masukan presensi pada kegiatan ini.</td></tr>';
         return;
       }
 
-      presensiLog.unshift({ tanggal, kegiatan, nama, status });
-      renderPresensiLog();
-      alert('Presensi berhasil disimpan!');
-    }
-
-    function renderPresensiLog() {
-      const tbody = document.getElementById('presensi-log-body');
       tbody.innerHTML = '';
-      presensiLog.forEach(log => {
+      logsActive.forEach(log => {
         tbody.innerHTML += `
           <tr>
-            <td>${log.tanggal}</td>
-            <td>${log.kegiatan}</td>
+            <td>${log.waktu}</td>
+            <td><strong>${log.idPps}</strong></td>
             <td>${log.nama}</td>
+            <td>${log.kegiatan}</td>
             <td><span class="badge badge-success">${log.status}</span></td>
           </tr>
         `;
       });
     }
 
-    document.getElementById('tgl-kegiatan').valueAsDate = new Date();
+    function renderRekapSemua() {
+      const tbody = document.getElementById('table-rekap-semua');
+      if (logPresensi.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8;">Belum ada data presensi.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = '';
+      logPresensi.forEach((log, index) => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${index + 1}</td>
+            <td><strong>${log.kegiatan}</strong></td>
+            <td>${log.idPps}</td>
+            <td>${log.nama}</td>
+            <td>${log.waktu}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function resetPresensiKegiatan(namaKegiatan) {
+      if (confirm('Yakin ingin mereset semua data presensi untuk kegiatan "' + namaKegiatan + '"?')) {
+        logPresensi = logPresensi.filter(p => p.kegiatan !== namaKegiatan);
+        localStorage.setItem('ttq_log_presensi', JSON.stringify(logPresensi));
+        renderKegiatanTable();
+      }
+    }
+
+    function filterTable(input, tableBodyId) {
+      const filter = input.value.toLowerCase();
+      const rows = document.getElementById(tableBodyId).getElementsByTagName('tr');
+      for (let i = 0; i < rows.length; i++) {
+        const text = rows[i].textContent.toLowerCase();
+        rows[i].style.display = text.includes(filter) ? '' : 'none';
+      }
+    }
+
+    // Inisialisasi awal
+    renderKegiatanTable();
+    renderMasterPesertaTable();
   </script>
 </body>
 </html>
