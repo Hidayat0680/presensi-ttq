@@ -21,7 +21,7 @@
     }
 
     /* ==========================================
-       1. SIDEBAR LEFT (BERANDA)
+       1. SIDEBAR NAVIGATION
        ========================================== */
     .sidebar {
       width: 240px;
@@ -96,7 +96,7 @@
     }
 
     /* ==========================================
-       2. MAIN CONTENT AREA (BERANDA)
+       2. MAIN WRAPPER & HEADER
        ========================================== */
     .main-wrapper {
       flex: 1;
@@ -137,6 +137,47 @@
       flex: 1;
     }
 
+    /* MANAJEMEN TAB VIEW */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* ==========================================
+       3. TAMPILAN DASHBOARD STATISTIK
+       ========================================== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
+      background: #0e1626;
+      border: 1px solid #1a2536;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 26px;
+      font-weight: 800;
+      color: #00d2ff;
+    }
+
+    /* ==========================================
+       4. TERMINAL PRESENSI & TABEL LOG
+       ========================================== */
     .terminal-card {
       background: #0e1626;
       border: 1px solid #1a2536;
@@ -217,7 +258,6 @@
       pointer-events: none;
     }
 
-    /* Tabel Log Presensi */
     .log-section {
       background: #0e1626;
       border: 1px solid #1a2536;
@@ -265,15 +305,13 @@
     .badge-izin { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; }
 
     /* ==========================================
-       3. HALAMAN SCAN FOKUS / MODAL (FULLSCREEN)
+       5. SCAN FOKUS VIEW (FULLSCREEN)
        ========================================== */
     .scan-focus-view {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
       background-color: #080d1a;
       z-index: 9999;
       align-items: center;
@@ -471,9 +509,7 @@
       pointer-events: none;
     }
 
-    /* ==========================================
-       4. MODAL INPUT UDZUR (SAKIT & IZIN)
-       ========================================== */
+    /* MODAL INPUT UDZUR */
     .udzur-modal-overlay {
       display: none;
       position: fixed;
@@ -546,7 +582,7 @@
 </head>
 <body>
 
-  <!-- SIDEBAR NAVIGASI -->
+  <!-- SIDEBAR NAVIGATION -->
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="brand-title">ABSENSI TTQ</div>
@@ -554,29 +590,34 @@
     </div>
 
     <div class="menu-group">
-      <div class="menu-item">
+      <!-- 1. DASHBOARD -->
+      <div class="menu-item" id="nav-dashboard" onclick="switchTab('dashboard')">
         <span>💻</span> Monitoring Dashboard
       </div>
 
       <div class="menu-label">Data Master</div>
-      <div class="menu-item">
+      <!-- 2. DATA KEGIATAN -->
+      <div class="menu-item" id="nav-kegiatan" onclick="switchTab('kegiatan')">
         <span>📋</span> Data Kegiatan
       </div>
 
       <div class="menu-label">Presensi</div>
-      <div class="menu-item active" onclick="bukaHalamanFokusScan()">
+      <!-- 3. SCAN PRESENSI -->
+      <div class="menu-item active" id="nav-scan" onclick="switchTab('scan')">
         <span>🔲</span> Scan / Input ID PPS
       </div>
-      <div class="menu-item">
+
+      <!-- 4. REKAP -->
+      <div class="menu-item" id="nav-rekap" onclick="switchTab('rekap')">
         <span>📄</span> Rekap & Export Excel
       </div>
     </div>
   </aside>
 
-  <!-- HALAMAN BERANDA UTAMA -->
-  <div class="main-wrapper" id="berandaView">
+  <!-- MAIN WRAPPER CONTAINER -->
+  <div class="main-wrapper">
     <header class="top-header">
-      <div class="header-title">
+      <div class="header-title" id="pageTitleDisplay">
         <span>💻</span> System Monitoring & Analytics
       </div>
       <div class="user-profile">
@@ -585,50 +626,138 @@
     </header>
 
     <main class="content-area">
-      <div class="terminal-card">
-        <div class="terminal-title">Terminal Presensi Kegiatan</div>
-        
-        <div class="form-group">
-          <label class="form-label">Pilih Kegiatan Target Presensi:</label>
-          <select class="select-box" id="selectKegiatan" onchange="updateKegiatanTarget()">
-            <option value="Pelantikan Juri Mtq">Pelantikan Juri Mtq</option>
-            <option value="Koordinasi Kontroling" selected>Koordinasi Kontroling</option>
-            <option value="Rapat Evaluasi Bulanan">Rapat Evaluasi Bulanan</option>
-          </select>
+
+      <!-- ==========================================
+           TAB 1: MONITORING DASHBOARD
+           ========================================== -->
+      <div id="tab-dashboard" class="tab-content">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Hadir</div>
+            <div class="stat-value" id="statHadir">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Sakit</div>
+            <div class="stat-value" style="color: #f87171;" id="statSakit">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Izin</div>
+            <div class="stat-value" style="color: #f59e0b;" id="statIzin">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Kehadiran (%)</div>
+            <div class="stat-value" style="color: #10b981;" id="statPersen">0%</div>
+          </div>
         </div>
 
-        <!-- Box Scan ID -->
-        <div class="scan-dropzone" onclick="bukaHalamanFokusScan()">
-          <div class="scan-icon-title">║║║║ Masukkan / Scan ID PPS</div>
-          <div class="scan-subtext">Ketik ID PPS lalu tekan Enter untuk menyimpan presensi. (Klik di sini untuk membuka mode full screen)</div>
-          <div class="scan-input-display">Masukkan ID PPS...</div>
+        <div class="terminal-card">
+          <div class="terminal-title">Ringkasan Grafik Monitoring</div>
+          <p style="color: #64748b; font-size: 13px;">Statistik real-time peserta yang sudah melakukan scan / input udzur pada hari ini.</p>
         </div>
       </div>
 
-      <!-- Tabel Log Presensi (Rekapan) -->
-      <div class="log-section">
-        <div class="log-header-title">Log Presensi Kegiatan Ini:</div>
-        <table class="table-log">
-          <thead>
-            <tr>
-              <th style="width: 15%;">Waktu</th>
-              <th style="width: 20%;">ID PPS</th>
-              <th style="width: 35%;">Nama Peserta</th>
-              <th style="width: 15%;">DOM</th>
-              <th style="width: 15%;">Status</th>
-            </tr>
-          </thead>
-          <tbody id="logTableBody">
-            <tr id="emptyRow">
-              <td colspan="5" style="text-align: center; color: #64748b;">Belum ada presensi pada kegiatan ini.</td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- ==========================================
+           TAB 2: DATA KEGIATAN
+           ========================================== -->
+      <div id="tab-kegiatan" class="tab-content">
+        <div class="terminal-card">
+          <div class="terminal-title">Daftar Kegiatan Master</div>
+          <table class="table-log" style="margin-top: 15px;">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama Kegiatan</th>
+                <th>Tanggal</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Pelantikan Juri Mtq</td>
+                <td>06 Oktober 2026</td>
+                <td><span class="badge-status badge-hadir">Selesai</span></td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Koordinasi Kontroling</td>
+                <td>06 Oktober 2026</td>
+                <td><span class="badge-status badge-izin">Berlangsung</span></td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>Rapat Evaluasi Bulanan</td>
+                <td>07 Oktober 2026</td>
+                <td><span class="badge-status" style="background: rgba(148, 163, 184, 0.2); color: #94a3b8;">Mendatang</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      <!-- ==========================================
+           TAB 3: SCAN / INPUT ID PPS
+           ========================================== -->
+      <div id="tab-scan" class="tab-content active">
+        <div class="terminal-card">
+          <div class="terminal-title">Terminal Presensi Kegiatan</div>
+          
+          <div class="form-group">
+            <label class="form-label">Pilih Kegiatan Target Presensi:</label>
+            <select class="select-box" id="selectKegiatan" onchange="updateKegiatanTarget()">
+              <option value="Pelantikan Juri Mtq">Pelantikan Juri Mtq</option>
+              <option value="Koordinasi Kontroling" selected>Koordinasi Kontroling</option>
+              <option value="Rapat Evaluasi Bulanan">Rapat Evaluasi Bulanan</option>
+            </select>
+          </div>
+
+          <!-- Dropzone Scan ID -->
+          <div class="scan-dropzone" onclick="bukaHalamanFokusScan()">
+            <div class="scan-icon-title">║║║║ Masukkan / Scan ID PPS</div>
+            <div class="scan-subtext">Ketik ID PPS lalu tekan Enter untuk menyimpan presensi. (Klik di sini untuk membuka mode full screen)</div>
+            <div class="scan-input-display">Masukkan ID PPS...</div>
+          </div>
+        </div>
+
+        <!-- Tabel Log Rekapan Presensi -->
+        <div class="log-section">
+          <div class="log-header-title">Log Presensi Kegiatan Ini:</div>
+          <table class="table-log">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Waktu</th>
+                <th style="width: 20%;">ID PPS</th>
+                <th style="width: 35%;">Nama Peserta</th>
+                <th style="width: 15%;">DOM</th>
+                <th style="width: 15%;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="logTableBody">
+              <tr id="emptyRow">
+                <td colspan="5" style="text-align: center; color: #64748b;">Belum ada presensi pada kegiatan ini.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==========================================
+           TAB 4: REKAP & EXPORT EXCEL
+           ========================================== -->
+      <div id="tab-rekap" class="tab-content">
+        <div class="terminal-card">
+          <div class="terminal-title">Rekapitulasi Data & Export</div>
+          <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Ekspor seluruh log presensi termasuk peserta yang Hadir, Sakit, maupun Izin.</p>
+          <button class="btn-submit" onclick="alert('Fitur Export Excel Siap Digunakan!')">📥 Export Ke Excel (.xlsx)</button>
+        </div>
+      </div>
+
     </main>
   </div>
 
-  <!-- HALAMAN SCAN FOKUS / MODAL FULLSCREEN -->
+  <!-- ==========================================
+       HALAMAN SCAN FOKUS (FULLSCREEN MODAL)
+       ========================================== -->
   <div class="scan-focus-view" id="scanFocusView">
     
     <!-- Tombol Gerigi & Menu Popup -->
@@ -640,19 +769,18 @@
         </svg>
       </button>
 
-      <!-- Dropdown Popup Menu -->
+      <!-- Popup Menu -->
       <div class="popup-menu" id="popupMenu">
         <button class="btn-menu-kembali" onclick="kembaliKeBeranda()">
           <span>←</span> Kembali
         </button>
-        <!-- TOMBOL DIGANTI MENJADI INPUT UDZUR -->
         <button class="btn-menu-udzur" onclick="bukaModalUdzur()">
           <span>📝</span> Input Udzur
         </button>
       </div>
     </div>
 
-    <!-- Card Kartu Absensi -->
+    <!-- Card Kartu Absensi Fullscreen -->
     <div class="focus-card">
       <div class="focus-left">
         <div>
@@ -664,7 +792,7 @@
           </div>
 
           <div class="focus-title-main">Absensi Digital<br>Pondok Pesantren Sidogiri</div>
-          <!-- POIN 1: TEKS KEGIATAN MENGIKUTI OPTION DARI SELECT BOX -->
+          <!-- TEKS KEGIATAN OTO-UPDATE -->
           <div class="focus-title-sub" id="displayNamaKegiatan">Koordinasi Kontroling</div>
 
           <input type="text" id="focusInputID" class="focus-input-box" placeholder="Masukkan ID PPS/ ID Pengurus" onkeypress="handleScanInput(event)" autofocus>
@@ -683,7 +811,7 @@
 
         <div class="focus-profile-header">
           <div class="focus-profile-title">Profile</div>
-          <!-- POIN 2: JAM DUAL/DIGITAL REALTIME -->
+          <!-- JAM REALTIME DIGITAL -->
           <div class="focus-profile-time" id="realtimeClock">00.00.00 WIS</div>
         </div>
       </div>
@@ -712,16 +840,52 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT SYSTEM LOGIC -->
+  <!-- LOGIK SYSTEM & NAVIGATION JAVASCRIPT -->
   <script>
-    // 1. DYNAMIC KEGIATAN TARGET
+    // COUNTER STATISTIK REALTIME
+    var totalHadirCount = 0;
+    var totalSakitCount = 0;
+    var totalIzinCount = 0;
+
+    // 1. PINDAH TAB SIDEBAR (NAVIGASI AKTIF)
+    function switchTab(tabName) {
+      // Sembunyikan semua konten tab
+      var tabs = document.querySelectorAll('.tab-content');
+      tabs.forEach(function(tab) {
+        tab.classList.remove('active');
+      });
+
+      // Hapus status active dari semua menu sidebar
+      var menuItems = document.querySelectorAll('.menu-item');
+      menuItems.forEach(function(item) {
+        item.classList.remove('active');
+      });
+
+      // Tampilkan tab yang dipilih
+      document.getElementById('tab-' + tabName).classList.add('active');
+      document.getElementById('nav-' + tabName).classList.add('active');
+
+      // Update Judul Topbar Header
+      var titleDisplay = document.getElementById('pageTitleDisplay');
+      if (tabName === 'dashboard') {
+        titleDisplay.innerHTML = '<span>💻</span> System Monitoring & Analytics';
+      } else if (tabName === 'kegiatan') {
+        titleDisplay.innerHTML = '<span>📋</span> Data Kegiatan Master';
+      } else if (tabName === 'scan') {
+        titleDisplay.innerHTML = '<span>🔲</span> Terminal Presensi Kegiatan';
+      } else if (tabName === 'rekap') {
+        titleDisplay.innerHTML = '<span>📄</span> Rekapitulasi & Export Data';
+      }
+    }
+
+    // 2. DYNAMIC NAMA KEGIATAN TARGET
     function updateKegiatanTarget() {
       var select = document.getElementById('selectKegiatan');
       var selectedText = select.options[select.selectedIndex].text;
       document.getElementById('displayNamaKegiatan').innerText = selectedText;
     }
 
-    // 2. REAL-TIME DIGITAL CLOCK (FORMAT: HH.MM.SS WIS)
+    // 3. REAL-TIME DIGITAL CLOCK (HH.MM.SS WIS)
     function startRealtimeClock() {
       setInterval(function() {
         var now = new Date();
@@ -732,9 +896,9 @@
         document.getElementById('realtimeClock').innerText = hours + '.' + minutes + '.' + seconds + ' WIS';
       }, 1000);
     }
-    startRealtimeClock(); // Jalankan jam otomatis
+    startRealtimeClock();
 
-    // NAVIGASI HALAMAN
+    // FULLSCREEN SCAN MODAL CONTROL
     function bukaHalamanFokusScan() {
       updateKegiatanTarget();
       document.getElementById('scanFocusView').classList.add('active');
@@ -752,7 +916,7 @@
       menu.classList.toggle('show');
     }
 
-    // POIN 3: MODAL & SIMPAN UDZUR KE REKAPAN
+    // 4. MODAL & SIMPAN UDZUR (SAKIT & IZIN)
     function bukaModalUdzur() {
       document.getElementById('popupMenu').classList.remove('show');
       document.getElementById('modalUdzur').classList.add('active');
@@ -774,10 +938,10 @@
 
       tambahKeRekapanLog(id, "Peserta (" + id + ")", "A-12", jenis);
       tutupModalUdzur();
-      alert('Data udzur (' + jenis + ') berhasil masuk ke rekapan presensi!');
+      alert('Data udzur (' + jenis + ') berhasil disimpan ke rekapan presensi!');
     }
 
-    // INPUT HADIR VIA ENTER SCANNER
+    // SCAN ID DENGAN TOMBOL ENTER
     function handleScanInput(event) {
       if (event.key === 'Enter') {
         var inputVal = event.target.value.trim();
@@ -788,7 +952,7 @@
       }
     }
 
-    // FUNGSI MEMASUKKAN DATA KE TABEL REKAPAN
+    // TAMBAH DATA KE LOG & UPDATE DASHBOARD STATISTIK
     function tambahKeRekapanLog(id, nama, dom, status) {
       var tbody = document.getElementById('logTableBody');
       var emptyRow = document.getElementById('emptyRow');
@@ -800,8 +964,24 @@
       var waktu = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
 
       var badgeClass = "badge-hadir";
-      if (status === "Sakit") badgeClass = "badge-sakit";
-      if (status === "Izin") badgeClass = "badge-izin";
+      if (status === "Sakit") {
+        badgeClass = "badge-sakit";
+        totalSakitCount++;
+      } else if (status === "Izin") {
+        badgeClass = "badge-izin";
+        totalIzinCount++;
+      } else {
+        totalHadirCount++;
+      }
+
+      // Update Angka di Dashboard
+      document.getElementById('statHadir').innerText = totalHadirCount;
+      document.getElementById('statSakit').innerText = totalSakitCount;
+      document.getElementById('statIzin').innerText = totalIzinCount;
+      
+      var totalSemua = totalHadirCount + totalSakitCount + totalIzinCount;
+      var persentase = totalSemua > 0 ? Math.round((totalHadirCount / totalSemua) * 100) : 0;
+      document.getElementById('statPersen').innerText = persentase + '%';
 
       var tr = document.createElement('tr');
       tr.innerHTML = `
