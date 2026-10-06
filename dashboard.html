@@ -146,7 +146,7 @@
     }
 
     /* ==========================================
-       3. DASHBOARD & STATS
+       3. DASHBOARD & CARDS
        ========================================== */
     .stats-grid {
       display: grid;
@@ -200,7 +200,7 @@
       display: block;
     }
 
-    .select-box {
+    .select-box, .input-date-box {
       width: 100%;
       padding: 10px 14px;
       background: #080d1a;
@@ -211,6 +211,18 @@
       font-size: 13px;
       outline: none;
       cursor: pointer;
+    }
+
+    .input-date-box {
+      color: #f8fafc;
+      font-weight: 500;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
     }
 
     .scan-dropzone {
@@ -527,7 +539,7 @@
       color: #f8fafc;
     }
 
-    /* WAKTU WIB REALTIME */
+    /* JAM TANPA DETIK FORMAT WIB */
     .focus-profile-time {
       font-size: 20px;
       font-weight: 800;
@@ -596,10 +608,11 @@
       background: #0088ff;
       color: #fff;
       border: none;
-      padding: 8px 16px;
+      padding: 10px 20px;
       border-radius: 8px;
       cursor: pointer;
       font-weight: 700;
+      font-size: 13px;
     }
   </style>
 </head>
@@ -620,13 +633,13 @@
 
       <div class="menu-label">Data Master</div>
       <!-- 2. DATA KEGIATAN -->
-      <div class="menu-item" id="nav-kegiatan" onclick="switchTab('kegiatan')">
+      <div class="menu-item active" id="nav-kegiatan" onclick="switchTab('kegiatan')">
         <span>📋</span> Data Kegiatan
       </div>
 
       <div class="menu-label">Presensi</div>
       <!-- 3. SCAN PRESENSI -->
-      <div class="menu-item active" id="nav-scan" onclick="switchTab('scan')">
+      <div class="menu-item" id="nav-scan" onclick="switchTab('scan')">
         <span>🔲</span> Scan / Input ID PPS
       </div>
 
@@ -641,7 +654,7 @@
   <div class="main-wrapper">
     <header class="top-header">
       <div class="header-title" id="pageTitleDisplay">
-        <span>🔲</span> Terminal Presensi Kegiatan
+        <span>📋</span> Data Kegiatan Master
       </div>
       <div class="user-profile">
         <span>👤</span> M. HIDAYATULLOH
@@ -680,26 +693,26 @@
       </div>
 
       <!-- ==========================================
-           TAB 2: DATA KEGIATAN MASTER (SESUAI GAMBAR 1)
+           TAB 2: DATA KEGIATAN MASTER (TANPA KOLOM TANGGAL, + JUMLAH PESERTA)
            ========================================== -->
-      <div id="tab-kegiatan" class="tab-content">
+      <div id="tab-kegiatan" class="tab-content active">
         <div class="terminal-card">
           <div class="terminal-title">Daftar Kegiatan Master</div>
           <table class="table-log" style="margin-top: 15px;">
             <thead>
               <tr>
-                <th style="width: 5%;">No</th>
-                <th style="width: 35%;">Nama Kegiatan</th>
-                <th style="width: 25%;">Tanggal</th>
+                <th style="width: 8%;">No</th>
+                <th style="width: 42%;">Nama Kegiatan</th>
+                <th style="width: 18%;">Jumlah Peserta</th>
                 <th style="width: 15%;">Status</th>
-                <th style="width: 20%; text-align: center;">Aksi</th>
+                <th style="width: 17%; text-align: center;">Aksi</th>
               </tr>
             </thead>
             <tbody id="kegiatanTableBody">
               <tr>
                 <td>1</td>
                 <td class="kegiatan-nama">Pelantikan Juri Mtq</td>
-                <td>06 Oktober 2026</td>
+                <td><strong style="color: #00d2ff;">150</strong> Peserta</td>
                 <td><span class="badge-status badge-hadir">Selesai</span></td>
                 <td>
                   <div class="action-btn-group" style="justify-content: center;">
@@ -712,7 +725,7 @@
               <tr>
                 <td>2</td>
                 <td class="kegiatan-nama">Koordinasi Kontroling</td>
-                <td>06 Oktober 2026</td>
+                <td><strong style="color: #00d2ff;">85</strong> Peserta</td>
                 <td><span class="badge-status badge-izin">Berlangsung</span></td>
                 <td>
                   <div class="action-btn-group" style="justify-content: center;">
@@ -725,7 +738,7 @@
               <tr>
                 <td>3</td>
                 <td class="kegiatan-nama">Rapat Evaluasi Bulanan</td>
-                <td>07 Oktober 2026</td>
+                <td><strong style="color: #00d2ff;">120</strong> Peserta</td>
                 <td><span class="badge-status" style="background: rgba(148, 163, 184, 0.2); color: #94a3b8;">Mendatang</span></td>
                 <td>
                   <div class="action-btn-group" style="justify-content: center;">
@@ -743,7 +756,7 @@
       <!-- ==========================================
            TAB 3: SCAN / INPUT ID PPS
            ========================================== -->
-      <div id="tab-scan" class="tab-content active">
+      <div id="tab-scan" class="tab-content">
         <div class="terminal-card">
           <div class="terminal-title">Terminal Presensi Kegiatan</div>
           
@@ -787,13 +800,46 @@
       </div>
 
       <!-- ==========================================
-           TAB 4: REKAP & EXPORT EXCEL
+           TAB 4: REKAP & EXPORT EXCEL (FILTER LENGKAP)
            ========================================== -->
       <div id="tab-rekap" class="tab-content">
         <div class="terminal-card">
           <div class="terminal-title">Rekapitulasi Data & Export</div>
-          <p style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Ekspor seluruh log presensi termasuk peserta yang Hadir, Sakit, maupun Izin.</p>
-          <button class="btn-submit" onclick="alert('Fitur Export Excel Siap Digunakan!')">📥 Export Ke Excel (.xlsx)</button>
+          <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">
+            Filter data presensi berdasarkan kegiatan, tanggal pelaksanaan, dan status peserta untuk mengekspor rekapitulasi file Excel.
+          </p>
+
+          <div class="filter-grid">
+            <!-- 1. PILIH KEGIATAN -->
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">1. Pilih Kegiatan:</label>
+              <select class="select-box" id="rekapKegiatan">
+                <option value="semua">-- Semua Kegiatan --</option>
+                <option value="Pelantikan Juri Mtq">Pelantikan Juri Mtq</option>
+                <option value="Koordinasi Kontroling" selected>Koordinasi Kontroling</option>
+                <option value="Rapat Evaluasi Bulanan">Rapat Evaluasi Bulanan</option>
+              </select>
+            </div>
+
+            <!-- 2. TANGGAL KEGIATAN DILAKSANAKAN -->
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">2. Tanggal Pelaksanaan Kegiatan:</label>
+              <input type="date" class="input-date-box" id="rekapTanggal" value="2026-10-06">
+            </div>
+
+            <!-- 3. KATEGORI PESERTA YANG DIREKAP -->
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">3. Status Peserta yang Direkap:</label>
+              <select class="select-box" id="rekapStatusPeserta">
+                <option value="seluruh">Seluruh Peserta</option>
+                <option value="hadir">Hadir</option>
+                <option value="hadir_halangan">Hadir dan Halangan (Sakit / Izin)</option>
+                <option value="alpha">Alpha (Tanpa Keterangan)</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="btn-submit" onclick="eksporExcelFilter()">📥 Export Ke Excel (.xlsx)</button>
         </div>
       </div>
 
@@ -801,7 +847,7 @@
   </div>
 
   <!-- ==========================================
-       HALAMAN SCAN FOKUS (GAMBAR 2 - JAM FORMAT WIB)
+       HALAMAN SCAN FOKUS (JAM FORMAT WIB TANPA DETIK)
        ========================================== -->
   <div class="scan-focus-view" id="scanFocusView">
     
@@ -854,8 +900,8 @@
 
         <div class="focus-profile-header">
           <div class="focus-profile-title">Profile</div>
-          <!-- JAM REALTIME DIGITAL FORMAT WIB -->
-          <div class="focus-profile-time" id="realtimeClock">00.00.00 WIB</div>
+          <!-- JAM REALTIME DIGITAL TANPA DETIK (FORMAT WIB) -->
+          <div class="focus-profile-time" id="realtimeClock">07.17 WIB</div>
         </div>
       </div>
     </div>
@@ -868,7 +914,7 @@
       <div class="udzur-modal-title">Input Halangan / Udzur</div>
       
       <label class="form-label">ID PPS / ID Pengurus:</label>
-      <input type="text" id="udzurID" class="modal-input" placeholder="Contoh: PPS-10293">
+      <input type="text" id="udzurID" class="focus-input-box" style="margin-bottom: 12px;" placeholder="Contoh: PPS-10293">
 
       <label class="form-label">Jenis Halangan:</label>
       <select id="udzurJenis" class="select-box" style="margin-bottom: 15px;">
@@ -960,7 +1006,7 @@
       }
     }
 
-    // 3. TARGET KEGIATAN & CLOCK REALTIME FORMAT WIB
+    // 3. TARGET KEGIATAN & CLOCK REALTIME TANPA DETIK (FORMAT WIB)
     function updateKegiatanTarget() {
       var select = document.getElementById('selectKegiatan');
       var selectedText = select.options[select.selectedIndex].text;
@@ -968,15 +1014,16 @@
     }
 
     function startRealtimeClock() {
-      setInterval(function() {
+      function updateClock() {
         var now = new Date();
         var hours = String(now.getHours()).padStart(2, '0');
         var minutes = String(now.getMinutes()).padStart(2, '0');
-        var seconds = String(now.getSeconds()).padStart(2, '0');
         
-        // DUA DIGIT + KETERANGAN WIB
-        document.getElementById('realtimeClock').innerText = hours + '.' + minutes + '.' + seconds + ' WIB';
-      }, 1000);
+        // JAM & MENIT TANPA DETIK
+        document.getElementById('realtimeClock').innerText = hours + '.' + minutes + ' WIB';
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
     }
     startRealtimeClock();
 
@@ -1072,6 +1119,18 @@
       `;
 
       tbody.insertBefore(tr, tbody.firstChild);
+    }
+
+    // 6. EKSPOR EXCEL FILTERED
+    function eksporExcelFilter() {
+      var kegiatan = document.getElementById('rekapKegiatan').value;
+      var tanggal = document.getElementById('rekapTanggal').value;
+      var status = document.getElementById('rekapStatusPeserta').options[document.getElementById('rekapStatusPeserta').selectedIndex].text;
+
+      alert("Mengekspor Rekapan Excel dengan Parameter:\n" +
+            "- Kegiatan: " + kegiatan + "\n" +
+            "- Tanggal: " + (tanggal ? tanggal : "Semua Tanggal") + "\n" +
+            "- Kategori Peserta: " + status);
     }
 
     window.onclick = function(event) {
